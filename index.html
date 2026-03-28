@@ -6,60 +6,73 @@
     <title>YT Analyst PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #050507; color: white; font-family: sans-serif; min-height: 100vh; }
+        body { background: #050507; color: white; font-family: system-ui, sans-serif; min-height: 100vh; }
         .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .danger-glow { border-color: #ef4444 !important; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
-        .tab-btn.active { background: #ef4444; }
+        .tab-btn.active { background: #ef4444; color: white; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4 md:p-10">
 
-    <div id="mainUI" class="max-w-3xl mx-auto mt-10 transition-all">
-        <h1 class="text-5xl font-black italic text-center mb-10">YT<span class="text-red-600">PRO</span></h1>
+    <div id="mainUI" class="max-w-3xl mx-auto transition-all">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-black italic uppercase tracking-tighter">YT<span class="text-red-600">PRO</span></h1>
+            <p class="text-gray-500 text-[10px] tracking-[0.4em] font-bold mt-2 uppercase">Intelligence Dashboard</p>
+        </header>
         
         <div id="searchBox" class="glass p-2 rounded-[2rem] flex flex-col md:flex-row gap-2 border border-white/10 transition-all">
-            <input type="text" id="channelInput" placeholder="Kanal nomi yoki @handle..." class="flex-grow bg-transparent p-4 outline-none text-white">
-            <button onclick="getStatistics()" id="searchBtn" class="bg-red-600 hover:bg-red-700 px-10 py-4 rounded-2xl font-bold uppercase transition">TAHLIL</button>
+            <input type="text" id="channelInput" placeholder="Kanal nomi yoki @handle..." 
+                class="flex-grow bg-transparent p-5 outline-none text-white text-lg">
+            <button onclick="getStatistics()" id="searchBtn" 
+                class="bg-red-600 hover:bg-red-700 px-10 py-5 rounded-2xl font-bold uppercase transition active:scale-95 shadow-lg shadow-red-600/20">
+                TAHLIL
+            </button>
         </div>
 
-        <div id="loading" class="hidden mt-10 text-center animate-pulse text-gray-500">Qidirilmoqda...</div>
+        <div id="loading" class="hidden mt-12 text-center">
+            <div class="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-gray-500 text-xs font-mono animate-pulse">YouTube serverlariga ulanilmoqda...</p>
+        </div>
 
-        <div id="result" class="hidden mt-10 glass p-8 rounded-[2.5rem] animate-in fade-in duration-500">
-            <div class="flex flex-col items-center gap-6">
-                <img id="avatar" class="w-32 h-32 rounded-3xl border-4 border-red-600 object-cover shadow-2xl">
+        <div id="result" class="hidden mt-12 glass p-10 rounded-[3rem] animate-in fade-in slide-in-from-bottom-5 duration-700">
+            <div class="flex flex-col items-center gap-8">
+                <img id="avatar" class="w-40 h-40 rounded-[2.5rem] border-4 border-white/10 object-cover shadow-2xl">
                 <div class="text-center">
-                    <h2 id="name" class="text-3xl font-bold"></h2>
-                    <p id="handle" class="text-red-500 font-mono mt-1"></p>
-                    <div id="stats" class="mt-4 flex gap-4 justify-center text-xs opacity-60 uppercase tracking-widest"></div>
+                    <h2 id="name" class="text-4xl font-black tracking-tight"></h2>
+                    <p id="handle" class="text-red-500 font-mono text-xl mt-2"></p>
+                    <div id="stats" class="mt-6 flex flex-wrap gap-4 justify-center text-[10px] font-bold uppercase tracking-widest text-gray-400"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="adminModal" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4">
-        <div class="glass w-full max-w-4xl h-[80vh] rounded-[2.5rem] flex flex-col overflow-hidden">
-            <div class="p-6 border-b border-white/5 flex justify-between bg-white/5 items-center">
-                <h2 class="font-bold text-red-600 uppercase italic">Command Center</h2>
-                <button onclick="closeAdmin()" class="text-xl">✕</button>
+        <div class="glass w-full max-w-5xl h-[85vh] rounded-[3rem] flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-8 border-b border-white/5 flex justify-between bg-white/5 items-center">
+                <h2 class="font-black text-red-600 uppercase italic text-xl tracking-tighter">Command Center</h2>
+                <button onclick="closeAdmin()" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition">✕</button>
             </div>
 
-            <div id="adminAuth" class="flex-grow flex flex-col items-center justify-center p-10">
-                <input type="password" id="adminPass" placeholder="Password" class="bg-white/5 border border-white/10 p-4 rounded-xl text-center mb-4 outline-none focus:border-red-600 text-2xl tracking-widest">
-                <button onclick="authAdmin()" class="bg-red-600 px-12 py-3 rounded-xl font-bold uppercase">KIRISH</button>
+            <div id="adminAuth" class="flex-grow flex flex-col items-center justify-center p-10 text-center">
+                <div class="bg-red-600/10 p-6 rounded-3xl mb-6"><svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 002-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
+                <input type="password" id="adminPass" placeholder="••••••••" class="bg-white/5 border border-white/10 p-6 rounded-3xl text-center mb-6 outline-none focus:border-red-600 text-3xl tracking-[0.5em] w-full max-w-xs transition-all">
+                <button onclick="authAdmin()" class="bg-red-600 px-16 py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-red-700 transition-all">DECRYPT</button>
             </div>
 
-            <div id="adminContent" class="hidden flex-grow flex overflow-hidden">
-                <div class="w-48 border-r border-white/5 p-4 space-y-2 bg-black/20">
-                    <button onclick="loadLogs(event)" class="tab-btn active w-full text-left p-3 rounded-xl text-[10px] font-bold uppercase">📊 LOGLAR</button>
-                    <button onclick="showFilter(event)" class="tab-btn w-full text-left p-3 rounded-xl text-[10px] font-bold uppercase">📝 FILTR</button>
-                    <button onclick="clearLocalBlock()" class="w-full border border-green-500/20 text-green-500 p-3 rounded-xl text-[9px] font-bold mt-10">🔓 O'ZIMNI OCHISH</button>
+            <div id="adminContent" class="hidden flex-grow flex flex-col md:flex-row overflow-hidden">
+                <div class="w-full md:w-64 border-r border-white/5 p-6 space-y-2 bg-black/20">
+                    <button onclick="loadLogs(event)" class="tab-btn active w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">📊 LIVE LOGS</button>
+                    <button onclick="showFilter(event)" class="tab-btn w-full text-left p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">📝 CONTENT FILTER</button>
+                    <div class="mt-10 pt-10 border-t border-white/5">
+                        <button onclick="clearLocalBlock()" class="w-full border border-green-500/30 text-green-500 p-4 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">🔓 SYSTEM OVERRIDE</button>
+                    </div>
                 </div>
-                <div id="adminMain" class="flex-grow p-6 overflow-y-auto"></div>
+                <div id="adminMain" class="flex-grow p-10 overflow-y-auto bg-black/10"></div>
             </div>
         </div>
     </div>
 
-    <button onclick="openAdmin()" class="fixed bottom-4 right-4 opacity-5 text-[10px]">ADMIN</button>
+    <button onclick="openAdmin()" class="fixed bottom-6 right-6 opacity-5 hover:opacity-100 transition-opacity font-mono text-[9px] tracking-widest">SYS_ROOT</button>
 
     <script>
         let currentAdminPass = "";
@@ -70,13 +83,16 @@
             const until = localStorage.getItem('blockUntil');
             const searchBtn = document.getElementById('searchBtn');
             const inputField = document.getElementById('channelInput');
+            const searchBox = document.getElementById('searchBox');
+
             if (until && new Date().getTime() < until) {
                 const min = Math.ceil((until - new Date().getTime()) / 60000);
                 searchBtn.disabled = true;
                 searchBtn.innerText = `BLOK (${min}m)`;
                 searchBtn.classList.replace('bg-red-600', 'bg-gray-800');
                 inputField.disabled = true;
-                document.getElementById('searchBox').classList.add('danger-glow');
+                inputField.placeholder = "Xavfsizlik tizimi tomonidan qulflangan!";
+                searchBox.classList.add('danger-glow');
                 return true;
             }
             return false;
@@ -94,31 +110,39 @@
             try {
                 const res = await fetch('/.netlify/functions/get-yt-data', {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: input })
                 });
+                
                 const data = await res.json();
 
-                if (res.status === 403) return alert("SERVER BLOKI!");
+                if (res.status === 403) {
+                    alert("IP BLOKLANGAN!");
+                    return;
+                }
 
-                // Oqlangan bo'lsa
+                // Global Unblock
                 if (data.isWhitelisted) {
-                    localStorage.clear();
+                    localStorage.removeItem('blockUntil');
+                    localStorage.removeItem('userStrikes');
                     location.reload();
                     return;
                 }
 
-                // Badword
+                // Badword Filter
                 if (data.customBadwords && data.customBadwords.some(w => input.toLowerCase().includes(w.toLowerCase()))) {
-                    return handleStrike(input);
+                    handleStrike(input);
+                    return;
                 }
 
                 if (data.channel) {
                     updateUI(data.channel);
                 } else {
-                    alert("Kanal topilmadi!");
+                    alert("Kanal topilmadi! @handle to'g'riligini tekshiring.");
                 }
             } catch (e) {
-                alert("Xato yuz berdi!");
+                console.error(e);
+                alert("Server xatosi yoki API limit tugadi.");
             } finally {
                 document.getElementById('loading').classList.add('hidden');
             }
@@ -129,7 +153,7 @@
             document.getElementById('name').innerText = c.snippet.title;
             document.getElementById('handle').innerText = c.snippet.customUrl || "";
             document.getElementById('avatar').src = c.snippet.thumbnails.high.url;
-            document.getElementById('stats').innerText = `${parseInt(c.statistics.subscriberCount).toLocaleString()} subs • ${parseInt(c.statistics.videoCount).toLocaleString()} videos`;
+            document.getElementById('stats').innerText = `📊 ${parseInt(c.statistics.subscriberCount).toLocaleString()} subs • ${parseInt(c.statistics.videoCount).toLocaleString()} videos • ${parseInt(c.statistics.viewCount).toLocaleString()} views`;
         }
 
         function handleStrike(input) {
@@ -137,9 +161,9 @@
             localStorage.setItem('userStrikes', s);
             if (s >= 3) {
                 localStorage.setItem('blockUntil', new Date().getTime() + 3600000);
-                alert("3-QOIDA BUZARLIK! 1 SOATGA BLOKLANDINGIZ.");
+                alert("⚠️ TIZIM QULFLANDI (3/3)!\n1 soatdan so'ng qayta urinib ko'ring.");
             } else {
-                alert(`OGOHLANTIRISH ${s}/3! Badword ishlatmang.`);
+                alert(`⚠️ OGOHLANTIRISH (${s}/3)!\nTaqiqlangan so'z ishlatildi.`);
             }
             fetch('/.netlify/functions/get-yt-data', { method: 'POST', body: JSON.stringify({ username: "🚨 STRIKE: " + input }) });
             checkBlock();
@@ -156,24 +180,30 @@
                 document.getElementById('adminAuth').classList.add('hidden');
                 document.getElementById('adminContent').classList.remove('hidden');
                 loadLogs();
-            } else { alert("Xato!"); }
+            } else { alert("ACCESS DENIED"); }
         }
 
         async function loadLogs(e) {
             if(e) toggleTab(e.target);
             const main = document.getElementById('adminMain');
-            main.innerHTML = "Yuklanmoqda...";
-            const res = await fetch('/.netlify/functions/get-yt-data', { method: 'POST', body: JSON.stringify({ action: 'get_logs', password: currentAdminPass }) });
+            main.innerHTML = "<p class='animate-pulse text-gray-600'>Fetching live logs...</p>";
+            
+            const res = await fetch('/.netlify/functions/get-yt-data', { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'get_logs', password: currentAdminPass }) 
+            });
             const logs = await res.json();
-            main.innerHTML = logs.map(l => `
-                <div class="glass p-4 rounded-2xl mb-2 flex justify-between items-center text-[10px]">
+            
+            main.innerHTML = `<h3 class='text-2xl font-black mb-8 italic uppercase tracking-tighter'>Live Activity</h3>` + 
+                logs.map(l => `
+                <div class="glass p-5 rounded-[2rem] mb-3 flex justify-between items-center border-white/5 hover:border-red-600/30 transition-all">
                     <div>
-                        <b class="${l.channel_username.includes('🚨') ? 'text-red-500' : 'text-green-500'}">${l.channel_username}</b>
-                        <p class="opacity-40">${l.ip_address} • ${new Date(l.created_at).toLocaleTimeString()}</p>
+                        <span class="${l.channel_username.includes('🚨') ? 'text-red-500 font-black' : 'text-green-500 font-bold'}">${l.channel_username}</span>
+                        <p class="text-[9px] text-gray-600 mt-1 uppercase tracking-widest">${l.ip_address} • ${new Date(l.created_at).toLocaleTimeString()}</p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="remoteAction('toggle_block', '${l.ip_address}')" class="text-red-500">BLOK</button>
-                        <button onclick="remoteAction('whitelist_ip', '${l.ip_address}')" class="text-green-500">OCHISH</button>
+                        <button onclick="remoteAction('toggle_block', '${l.ip_address}')" class="bg-red-600/10 text-red-500 px-4 py-2 rounded-xl text-[9px] font-black hover:bg-red-600 hover:text-white transition">BLOCK</button>
+                        <button onclick="remoteAction('whitelist_ip', '${l.ip_address}')" class="bg-green-600/10 text-green-500 px-4 py-2 rounded-xl text-[9px] font-black hover:bg-green-600 hover:text-white transition">RELEASE</button>
                     </div>
                 </div>
             `).join('');
@@ -182,9 +212,10 @@
         function showFilter(e) {
             toggleTab(e.target);
             document.getElementById('adminMain').innerHTML = `
-                <div class="glass p-6 rounded-3xl">
-                    <input type="text" id="newWord" class="bg-white/5 p-3 rounded-xl w-full mb-3 outline-none border border-white/10" placeholder="Yangi so'z...">
-                    <button onclick="addWord()" class="bg-green-600 w-full py-3 rounded-xl font-bold">QO'SHISH</button>
+                <h3 class='text-2xl font-black mb-8 italic uppercase tracking-tighter'>Word Filter</h3>
+                <div class="glass p-10 rounded-[2.5rem] border-white/10">
+                    <input type="text" id="newWord" class="bg-white/5 border border-white/10 p-5 rounded-2xl w-full mb-4 outline-none focus:border-red-600" placeholder="Yangi taqiqlangan so'z...">
+                    <button onclick="addWord()" class="bg-green-600 w-full py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-green-700 transition">QO'SHISH</button>
                 </div>
             `;
         }
@@ -192,7 +223,8 @@
         async function addWord() {
             const word = document.getElementById('newWord').value;
             await fetch('/.netlify/functions/get-yt-data', { method: 'POST', body: JSON.stringify({ action: 'add_badword', password: currentAdminPass, word }) });
-            alert("Qo'shildi!");
+            alert("Filtrga qo'shildi!");
+            document.getElementById('newWord').value = "";
         }
 
         async function remoteAction(action, ip) {
@@ -208,6 +240,7 @@
 
         function clearLocalBlock() {
             localStorage.clear();
+            alert("System override successful!");
             location.reload();
         }
     </script>
