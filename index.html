@@ -3,108 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT Analyst PRO | Intelligence Dashboard</title>
+    <title>YT Analyst PRO | Neural Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #050507; color: white; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .stat-card { transition: all 0.3s ease; border-left: 2px solid transparent; }
-        .stat-card:hover { background: rgba(255, 255, 255, 0.05); border-left: 2px solid #ef4444; transform: translateX(5px); }
-        .danger-glow { border-color: #ef4444 !important; box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+        body { background: #050507; color: white; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.5rem; }
+        .stat-card { background: rgba(255, 255, 255, 0.03); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; }
+        .stat-card:hover { background: rgba(255, 255, 255, 0.06); transform: translateY(-3px); border-color: rgba(239, 68, 68, 0.3); }
         .hidden { display: none !important; }
         
-        /* Loading Animatsiyasi */
+        /* Input styling */
+        .search-input { border-radius: 1.5rem !important; }
+        
         .loader {
-            width: 48px; height: 48px; border: 3px solid #FFF; border-bottom-color: #ef4444;
-            border-radius: 50%; display: inline-block; box-sizing: border-box;
-            animation: rotation 1s linear infinite;
+            width: 32px; height: 32px; border: 3px solid #FFF; border-bottom-color: #ef4444;
+            border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite;
         }
         @keyframes rotation { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
     </style>
 </head>
-<body class="p-4 md:p-12">
+<body class="p-4 md:p-10">
 
-    <div class="max-w-4xl mx-auto">
-        <header class="text-center mb-16">
-            <h1 class="text-6xl font-black italic uppercase tracking-tighter mix-blend-difference">
-                YT<span class="text-red-600">PRO</span>
-            </h1>
-            <div class="flex items-center justify-center gap-2 mt-2">
-                <span class="h-[1px] w-8 bg-red-600"></span>
-                <p class="text-gray-500 text-[9px] tracking-[0.5em] font-bold uppercase">Advanced Neural Analytics</p>
-                <span class="h-[1px] w-8 bg-red-600"></span>
-            </div>
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-black italic tracking-tighter uppercase">YT<span class="text-red-600">PRO</span></h1>
+            <p class="text-gray-500 text-[9px] tracking-[0.4em] font-bold mt-2 uppercase">Advanced Data Intelligence</p>
         </header>
         
-        <div id="searchBox" class="glass p-3 rounded-[2.5rem] flex flex-col md:flex-row gap-2 transition-all duration-500 mb-12">
+        <div id="searchBox" class="glass p-2 flex flex-col md:flex-row gap-2 transition-all duration-500 mb-16 shadow-2xl shadow-black">
             <input type="text" id="channelInput" placeholder="Kanal nomi yoki @handle..." 
-                class="flex-grow bg-transparent p-5 outline-none text-white text-xl font-light placeholder:text-gray-700">
+                class="flex-grow bg-transparent p-5 outline-none text-white text-lg font-light search-input">
             <button onclick="getStatistics()" id="searchBtn" 
-                class="bg-red-600 hover:bg-red-700 px-12 py-5 rounded-[2rem] font-black uppercase tracking-widest transition active:scale-95 shadow-xl shadow-red-900/20">
-                ANALYSIS
+                class="bg-red-600 hover:bg-red-700 px-12 py-5 rounded-[1.25rem] font-black uppercase tracking-widest transition active:scale-95">
+                ANALIZ
             </button>
         </div>
 
-        <div id="loading" class="hidden flex flex-col items-center py-20">
-            <span class="loader mb-4"></span>
-            <p class="text-gray-600 font-mono text-[10px] uppercase tracking-widest">Sinxronizatsiya qilinmoqda...</p>
+        <div id="loading" class="hidden flex flex-col items-center py-10">
+            <span class="loader"></span>
         </div>
 
-        <div id="result" class="hidden space-y-8 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+        <div id="result" class="hidden space-y-8 animate-in fade-in duration-700">
             
-            <div class="glass p-8 md:p-12 rounded-[3.5rem] flex flex-col md:flex-row items-center gap-10">
-                <div class="relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-red-600 to-purple-600 rounded-[3rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                    <img id="avatar" class="relative w-44 h-44 rounded-[2.8rem] object-cover border border-white/10 shadow-2xl">
-                </div>
-                
+            <div class="glass p-8 md:p-10 flex flex-col md:flex-row items-center gap-10">
+                <img id="avatar" class="w-40 h-40 rounded-[2rem] object-cover border-4 border-white/5 shadow-2xl">
                 <div class="flex-grow text-center md:text-left">
-                    <h2 id="name" class="text-5xl font-black tracking-tight leading-none mb-2"></h2>
-                    <p id="handle" class="text-red-600 font-mono text-lg mb-6 opacity-80"></p>
+                    <h2 id="name" class="text-4xl font-black mb-1"></h2>
+                    <p id="handle" class="text-red-600 font-mono text-sm mb-6 opacity-70"></p>
                     
-                    <div id="mainStatsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div id="mainStatsGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass p-8 rounded-[2.5rem]">
-                    <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6">Algorithm Insights</h3>
-                    <div id="insightsList" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <div class="md:col-span-2 glass p-8 space-y-6">
+                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Deep Channel Metrics</h3>
+                    <div id="detailedStats" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         </div>
                 </div>
 
-                <div class="glass p-8 rounded-[2.5rem] border border-red-900/10">
-                    <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6">Channel Growth Rank</h3>
-                    <div class="flex items-center justify-between">
-                        <div id="rankBadge" class="text-7xl font-black italic text-red-600 drop-shadow-2xl italic tracking-tighter"></div>
-                        <div class="text-right">
-                            <p class="text-[10px] text-gray-500 uppercase">Status</p>
-                            <p id="statusText" class="font-bold text-lg text-white"></p>
-                        </div>
-                    </div>
+                <div class="glass p-8 flex flex-col justify-center items-center text-center">
+                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-6">Channel Rank</h3>
+                    <div id="rankBadge" class="text-8xl font-black italic text-red-600 mb-2"></div>
+                    <p id="statusText" class="text-sm font-bold tracking-widest uppercase"></p>
                 </div>
+            </div>
+
+            <div class="glass p-8">
+                <h3 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Channel Description & Context</h3>
+                <p id="description" class="text-sm text-gray-400 leading-relaxed italic"></p>
             </div>
 
         </div>
     </div>
 
-    <div style="position: fixed; bottom: 20px; right: 20px; opacity: 0.1; cursor: pointer; font-size: 8px; font-family: monospace;" 
-         onclick="window.location.href='admin.html'" class="hover:opacity-100 transition-opacity">
-        SYS_VER_1.1.2_STABLE
-    </div>
+    <div style="position: fixed; bottom: 20px; right: 20px; opacity: 0.1; cursor: pointer; font-size: 8px;" 
+         onclick="window.location.href='admin.html'">v1.1.5_PRO</div>
 
     <script>
         async function getStatistics() {
             const input = document.getElementById('channelInput').value.trim();
             if (!input) return;
-
-            // Local Block Check
-            const blockUntil = localStorage.getItem('blockUntil');
-            if (blockUntil && new Date().getTime() < blockUntil) {
-                alert("Xavfsizlik tizimi: Siz vaqtincha bloklangansiz!");
-                return;
-            }
 
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('result').classList.add('hidden');
@@ -112,105 +93,86 @@
             try {
                 const res = await fetch('/.netlify/functions/get-yt-data', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: input })
                 });
                 
-                if (res.status === 403) {
-                    alert("⚠️ IP manzilingiz server tomonidan butunlay bloklangan!");
-                    return;
-                }
-
+                if (res.status === 403) { alert("Siz bloklangansiz!"); return; }
                 const data = await res.json();
-
-                // Badword Check
-                if (data.badwords && data.badwords.some(w => input.toLowerCase().includes(w.toLowerCase()))) {
-                    handleStrike();
-                    return;
-                }
 
                 if (data.channel) {
                     renderUI(data.channel);
                 } else {
                     alert("Kanal topilmadi!");
                 }
-            } catch (e) {
-                alert("Server xatosi!");
-            } finally {
-                document.getElementById('loading').classList.add('hidden');
-            }
+            } catch (e) { alert("Xatolik!"); }
+            finally { document.getElementById('loading').classList.add('hidden'); }
         }
 
         function renderUI(c) {
-            const res = document.getElementById('result');
-            res.classList.remove('hidden');
-
+            document.getElementById('result').classList.remove('hidden');
             document.getElementById('name').innerText = c.snippet.title;
-            document.getElementById('handle').innerText = c.snippet.customUrl || "@" + input;
+            document.getElementById('handle').innerText = c.snippet.customUrl || "@" + c.snippet.title;
             document.getElementById('avatar').src = c.snippet.thumbnails.high.url;
+            document.getElementById('description').innerText = c.snippet.description || "Kanal haqida tavsif mavjud emas.";
 
-            const subs = parseInt(c.statistics.subscriberCount);
-            const views = parseInt(c.statistics.viewCount);
-            const videos = parseInt(c.statistics.videoCount);
+            const subs = parseInt(c.statistics.subscriberCount) || 0;
+            const views = parseInt(c.statistics.viewCount) || 0;
+            const videos = parseInt(c.statistics.videoCount) || 0;
             
-            // Asosiy Grid
+            // Asosiy Grid (Olib tashlangan daromad o'rniga faollik qo'shildi)
             document.getElementById('mainStatsGrid').innerHTML = `
-                <div class="stat-card p-3 rounded-xl bg-white/5">
-                    <p class="text-[8px] text-gray-500 uppercase">Obunachilar</p>
-                    <p class="text-lg font-black">${subs.toLocaleString()}</p>
+                <div class="stat-card">
+                    <p class="text-[9px] text-gray-500 uppercase mb-1">Subscribers</p>
+                    <p class="text-xl font-black">${subs.toLocaleString()}</p>
                 </div>
-                <div class="stat-card p-3 rounded-xl bg-white/5">
-                    <p class="text-[8px] text-gray-500 uppercase">Ko'rishlar</p>
-                    <p class="text-lg font-black">${(views/1000000).toFixed(1)}M</p>
+                <div class="stat-card">
+                    <p class="text-[9px] text-gray-500 uppercase mb-1">Total Views</p>
+                    <p class="text-xl font-black">${(views/1000000).toFixed(1)}M</p>
                 </div>
-                <div class="stat-card p-3 rounded-xl bg-white/5">
-                    <p class="text-[8px] text-gray-500 uppercase">Videolar</p>
-                    <p class="text-lg font-black">${videos}</p>
+                <div class="stat-card">
+                    <p class="text-[9px] text-gray-500 uppercase mb-1">Uploads</p>
+                    <p class="text-xl font-black">${videos}</p>
                 </div>
-                <div class="stat-card p-3 rounded-xl bg-white/5">
-                    <p class="text-[8px] text-gray-500 uppercase">Daromad*</p>
-                    <p class="text-lg font-black text-green-500">$${(views/50000).toFixed(0)}k+</p>
+                <div class="stat-card">
+                    <p class="text-[9px] text-gray-500 uppercase mb-1">Engagement</p>
+                    <p class="text-xl font-black text-red-600">${((views/subs)/videos*100).toFixed(2)}%</p>
                 </div>
             `;
 
-            // Deep Insights
+            // Batafsil ma'lumotlar
             const age = Math.floor((new Date() - new Date(c.snippet.publishedAt)) / (1000 * 60 * 60 * 24));
-            const engagement = ((views / subs) / videos * 100).toFixed(2);
+            const viewPerVideo = Math.floor(views / videos).toLocaleString();
 
-            document.getElementById('insightsList').innerHTML = `
-                <div class="flex justify-between text-xs border-b border-white/5 pb-2">
-                    <span class="text-gray-500 uppercase">Kanal yoshi</span>
-                    <span class="font-bold">${age} kun</span>
+            document.getElementById('detailedStats').innerHTML = `
+                <div class="border-l border-red-600/30 pl-4">
+                    <p class="text-[10px] text-gray-500 uppercase">Kanal ochilgan sana</p>
+                    <p class="text-sm font-bold">${new Date(c.snippet.publishedAt).toLocaleDateString()}</p>
                 </div>
-                <div class="flex justify-between text-xs border-b border-white/5 pb-2">
-                    <span class="text-gray-500 uppercase">Foydali ish koeffitsienti</span>
-                    <span class="font-bold text-red-500">${engagement}%</span>
+                <div class="border-l border-red-600/30 pl-4">
+                    <p class="text-[10px] text-gray-500 uppercase">Kanal yoshi</p>
+                    <p class="text-sm font-bold">${age} kun</p>
                 </div>
-                <div class="flex justify-between text-xs border-b border-white/5 pb-2">
-                    <span class="text-gray-500 uppercase">Auditoriya Sifati</span>
-                    <span class="font-bold text-green-500">${subs > 1000000 ? 'Viral' : 'Stable'}</span>
+                <div class="border-l border-red-600/30 pl-4">
+                    <p class="text-[10px] text-gray-500 uppercase">Video boshiga o'rtacha ko'rish</p>
+                    <p class="text-sm font-bold">${viewPerVideo}</p>
+                </div>
+                <div class="border-l border-red-600/30 pl-4">
+                    <p class="text-[10px] text-gray-500 uppercase">Mamlakat / Til</p>
+                    <p class="text-sm font-bold">${c.snippet.country || 'Aniqlanmadi'}</p>
                 </div>
             `;
 
-            // Rank Badge
-            const rank = subs > 1000000 ? 'S+' : (subs > 100000 ? 'A' : 'B');
+            // Rank Badge Logic
+            let rank = "C";
+            let status = "Newbie";
+            if(subs > 1000000) { rank = "S+"; status = "Global Legend"; }
+            else if(subs > 100000) { rank = "A"; status = "Verified Pro"; }
+            else if(subs > 10000) { rank = "B+"; status = "Rising Creator"; }
+            
             document.getElementById('rankBadge').innerText = rank;
-            document.getElementById('statusText').innerText = subs > 1000000 ? "TIER 1 ELITE" : "RISING STAR";
+            document.getElementById('statusText').innerText = status;
         }
 
-        function handleStrike() {
-            let s = parseInt(localStorage.getItem('userStrikes') || '0') + 1;
-            localStorage.setItem('userStrikes', s);
-            if(s >= 3) {
-                localStorage.setItem('blockUntil', new Date().getTime() + 1200000);
-                alert("🚨 TIZIM QULFLANDI (3/3)!");
-            } else {
-                alert(`⚠️ Ogohlantirish! (${s}/3)`);
-            }
-            location.reload();
-        }
-
-        // Enter orqali qidirish
         document.getElementById('channelInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') getStatistics(); });
     </script>
 </body>
