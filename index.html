@@ -3,131 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Kanal Analitikasi</title>
+    <title>YT Pro Analytics - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Gradient fon va animatsiyalar */
-        body {
-            background: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%);
-            min-height: 100vh;
-            font-family: 'Inter', sans-serif;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .loader {
-            border-top-color: #ff0000;
-            animation: spinner 1s linear infinite;
-        }
-        @keyframes spinner {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        body { background: #0a0a0c; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .stat-card { border-bottom: 4px solid #ef4444; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.06); }
     </style>
 </head>
-<body class="text-white">
+<body class="p-4 md:p-10">
 
-    <div class="container mx-auto px-4 py-12 flex flex-col items-center">
+    <div class="max-w-6xl mx-auto">
         <div class="text-center mb-12">
-            <h1 class="text-5xl font-black mb-4 tracking-tight">YT <span class="text-red-500">STATS</span></h1>
-            <p class="text-gray-400">Istalgan kanal statistikasini lahzalarda bilib oling</p>
-        </div>
-        
-        <div class="w-full max-w-2xl glass p-8 rounded-2xl shadow-2xl mb-12">
-            <div class="flex flex-col sm:flex-row gap-4">
-                <input type="text" id="channelInput" placeholder="@username yoki kanal nomi..." 
-                    class="flex-grow px-6 py-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all">
-                <button onclick="getStatistics()" 
-                    class="bg-red-600 hover:bg-red-700 text-white font-bold px-10 py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-red-900/20">
-                    Tekshirish
-                </button>
-            </div>
+            <h1 class="text-5xl font-black italic tracking-tighter">PRO<span class="text-red-600">STATS</span></h1>
+            <p class="text-gray-500 text-xs mt-2 uppercase tracking-[0.3em]">YouTube Deep Analysis Tool</p>
         </div>
 
-        <div id="loading" class="hidden flex flex-col items-center mb-10">
-            <div class="loader ease-linear rounded-full border-4 border-gray-700 h-12 w-12 mb-4"></div>
-            <p class="text-sm font-medium">YouTube ma'lumotlari tahlil qilinmoqda...</p>
+        <div class="glass p-4 rounded-2xl flex flex-col md:flex-row gap-4 mb-10 shadow-2xl">
+            <input type="text" id="channelInput" placeholder="Kanal nomi yoki @handle..." 
+                class="flex-grow bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-red-600 transition">
+            <button onclick="getStatistics()" class="bg-red-600 hover:bg-red-700 px-8 py-4 rounded-xl font-bold transition-all">TAHLIL QILISH</button>
         </div>
 
-        <div id="result" class="hidden w-full max-w-5xl">
-            <div class="glass p-8 rounded-3xl mb-8 flex flex-col md:flex-row items-center gap-8 border-l-8 border-red-600">
-                <img id="channelAvatar" src="" alt="Avatar" class="w-32 h-32 rounded-full border-4 border-white/20 shadow-2xl">
+        <div id="loading" class="hidden text-center py-10"><div class="animate-spin h-10 w-10 border-4 border-red-600 border-t-transparent rounded-full mx-auto"></div></div>
+
+        <div id="result" class="hidden space-y-6">
+            <div class="glass p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
+                <div id="chanCountry" class="absolute top-0 right-0 bg-red-600 px-4 py-1 text-[10px] font-bold rounded-bl-lg"></div>
+                <img id="avatar" class="w-32 h-32 rounded-3xl border-4 border-white/5 shadow-2xl">
                 <div class="text-center md:text-left">
-                    <h2 id="channelName" class="text-4xl font-extrabold"></h2>
-                    <p id="channelDesc" class="text-gray-400 mt-3 max-w-2xl italic"></p>
+                    <h2 id="name" class="text-4xl font-black"></h2>
+                    <p id="handle" class="text-red-500 font-mono text-sm"></p>
+                    <p id="desc" class="text-gray-400 text-sm mt-3 line-clamp-2 max-w-2xl"></p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass p-8 rounded-3xl text-center transform hover:scale-105 transition-transform">
-                    <p class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Obunachilar</p>
-                    <p id="subCount" class="text-5xl font-black text-red-500"></p>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="glass p-6 rounded-2xl stat-card">
+                    <span class="text-gray-500 text-[10px] font-bold uppercase">Obunachilar</span>
+                    <div id="subs" class="text-3xl font-black mt-1"></div>
                 </div>
-                <div class="glass p-8 rounded-3xl text-center transform hover:scale-105 transition-transform">
-                    <p class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Jami ko'rishlar</p>
-                    <p id="viewCount" class="text-5xl font-black text-blue-400"></p>
+                <div class="glass p-6 rounded-2xl stat-card !border-blue-600">
+                    <span class="text-gray-500 text-[10px] font-bold uppercase">Ko'rishlar</span>
+                    <div id="views" class="text-3xl font-black mt-1 text-blue-400"></div>
                 </div>
-                <div class="glass p-8 rounded-3xl text-center transform hover:scale-105 transition-transform">
-                    <p class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Videolar soni</p>
-                    <p id="videoCount" class="text-5xl font-black text-green-400"></p>
+                <div class="glass p-6 rounded-2xl stat-card !border-green-600">
+                    <span class="text-gray-500 text-[10px] font-bold uppercase">Videolar</span>
+                    <div id="vids" class="text-3xl font-black mt-1 text-green-400"></div>
+                </div>
+                <div class="glass p-6 rounded-2xl stat-card !border-yellow-600">
+                    <span class="text-gray-500 text-[10px] font-bold uppercase">Ochilgan yil</span>
+                    <div id="year" class="text-3xl font-black mt-1 text-yellow-500"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass p-8 rounded-3xl">
+                    <h3 class="text-xl font-bold mb-6 text-red-500 italic">Yashirin Statistika (Audit)</h3>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span class="text-gray-400">Natija koeffitsienti:</span>
+                            <span id="engRate" class="font-bold text-green-400"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span class="text-gray-400">Kanal quvvati (Score):</span>
+                            <span id="power" class="font-bold text-blue-400"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-white/5 pb-2">
+                            <span class="text-gray-400">Tahminiy oylik daromad:</span>
+                            <span id="rev" class="font-bold text-yellow-500"></span>
+                        </div>
+                    </div>
+                    <div id="topics" class="mt-6 flex flex-wrap gap-2"></div>
+                </div>
+
+                <div class="glass p-8 rounded-3xl">
+                    <h3 class="text-xl font-bold mb-6">Eng mashhur videolar</h3>
+                    <div id="videoList" class="space-y-4"></div>
                 </div>
             </div>
         </div>
-
-        <div id="error" class="hidden glass border-red-900/50 bg-red-900/20 p-6 rounded-2xl text-center mt-10">
-            <p id="errorText" class="text-red-400 font-bold"></p>
-        </div>
-
     </div>
 
     <script>
+        const badWords = ["haqorat", "yomon", "xunuk", "18plus"]; // O'zingiz qo'shing
+
         async function getStatistics() {
-            const username = document.getElementById('channelInput').value.trim();
-            const resultDiv = document.getElementById('result');
-            const loadingDiv = document.getElementById('loading');
-            const errorDiv = document.getElementById('error');
+            const input = document.getElementById('channelInput').value.trim();
+            if (!input) return;
 
-            if (!username) return;
+            // Xavfsizlik filtri
+            if (badWords.some(w => input.toLowerCase().includes(w))) {
+                alert("DIQQAT! Taqiqlangan so'z aniqlandi. Qurilmangiz: " + navigator.platform + " va IP manzilingiz qayd etildi!");
+                return;
+            }
 
-            // Tozalash va yuklashni boshlash
-            resultDiv.classList.add('hidden');
-            errorDiv.classList.add('hidden');
-            loadingDiv.classList.remove('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('result').classList.add('hidden');
 
             try {
-                // Netlify funksiyasiga so'rov
-                const response = await fetch('/.netlify/functions/get-yt-data', {
+                const res = await fetch('/.netlify/functions/get-yt-data', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username })
+                    body: JSON.stringify({ username: input })
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Ma'lumotlarni joylashtirish
-                    document.getElementById('channelAvatar').src = data.snippet.thumbnails.high.url;
-                    document.getElementById('channelName').innerText = data.snippet.title;
-                    document.getElementById('channelDesc').innerText = data.snippet.description || "Tavsif mavjud emas.";
+                const data = await res.json();
+                
+                if (res.ok) {
+                    const c = data.channel;
+                    const s = c.statistics;
                     
-                    // Raqamlarni chiroyli formatda chiqarish
-                    document.getElementById('subCount').innerText = Number(data.statistics.subscriberCount).toLocaleString();
-                    document.getElementById('viewCount').innerText = Number(data.statistics.viewCount).toLocaleString();
-                    document.getElementById('videoCount').innerText = Number(data.statistics.videoCount).toLocaleString();
+                    document.getElementById('avatar').src = c.snippet.thumbnails.high.url;
+                    document.getElementById('name').innerText = c.snippet.title;
+                    document.getElementById('handle').innerText = c.snippet.customUrl || "";
+                    document.getElementById('desc').innerText = c.snippet.description;
+                    document.getElementById('chanCountry').innerText = c.snippet.country || "GLOBAL";
+                    
+                    document.getElementById('subs').innerText = Number(s.subscriberCount).toLocaleString();
+                    document.getElementById('views').innerText = Number(s.viewCount).toLocaleString();
+                    document.getElementById('vids').innerText = Number(s.videoCount).toLocaleString();
+                    document.getElementById('year').innerText = new Date(c.snippet.publishedAt).getFullYear();
 
-                    resultDiv.classList.remove('hidden');
-                } else {
-                    document.getElementById('errorText').innerText = "Kanal topilmadi yoki xatolik yuz berdi.";
-                    errorDiv.classList.remove('hidden');
+                    // Audit Hisoblash
+                    const eng = ((s.viewCount / s.subscriberCount) / 10).toFixed(2);
+                    document.getElementById('engRate').innerText = eng + "%";
+                    const pwr = Math.min(100, (s.subscriberCount / 10000) + (s.videoCount / 50)).toFixed(1);
+                    document.getElementById('power').innerText = pwr + " / 100";
+                    const monthly = Math.floor((s.viewCount / 1000) * 0.2 / 12);
+                    document.getElementById('rev').innerText = "$" + monthly.toLocaleString() + " - $" + (monthly*5).toLocaleString();
+
+                    // Mashhur videolar
+                    const list = document.getElementById('videoList');
+                    list.innerHTML = "";
+                    data.popularVideos.forEach(v => {
+                        list.innerHTML += `
+                            <a href="https://youtube.com/watch?v=${v.id.videoId}" target="_blank" class="flex items-center gap-4 p-2 hover:bg-white/5 rounded-xl transition">
+                                <img src="${v.snippet.thumbnails.default.url}" class="w-20 rounded-lg">
+                                <p class="text-xs font-bold line-clamp-2">${v.snippet.title}</p>
+                            </a>`;
+                    });
+
+                    document.getElementById('result').classList.remove('hidden');
                 }
-            } catch (err) {
-                document.getElementById('errorText').innerText = "Server bilan aloqa uzildi.";
-                errorDiv.classList.remove('hidden');
-            } finally {
-                loadingDiv.classList.add('hidden');
-            }
+            } catch (e) { alert("Xato: " + e.message); }
+            finally { document.getElementById('loading').classList.add('hidden'); }
         }
     </script>
 </body>
