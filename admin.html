@@ -2,38 +2,50 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>YT-PRO | ROOT TERMINAL</title>
+    <title>OWNER TERMINAL v2.4 | Restricted Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: #000; color: #0f0; font-family: 'Courier New', monospace; }
-        .glitch { border: 1px solid #0f0; box-shadow: 0 0 10px #0f0; }
+        .owner-border { border: 1px solid #0f0; box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); }
+        input { background: transparent; border-bottom: 1px solid #0f0; color: #0f0; outline: none; }
         .hidden { display: none !important; }
     </style>
 </head>
-<body class="p-10">
+<body class="p-6">
     <div id="auth" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
-        <h2 class="mb-5 tracking-widest animate-pulse">SYSTEM ACCESS REQUIRED</h2>
-        <input type="password" id="pass" class="bg-black border-b border-green-500 text-center text-2xl outline-none mb-5">
-        <button onclick="login()" class="border border-green-500 px-10 py-2 hover:bg-green-500 hover:text-black transition">ENTER</button>
+        <h1 class="text-xl mb-8 animate-pulse font-bold tracking-[0.5em]">OWNER IDENTIFICATION</h1>
+        <input type="password" id="rootPass" class="text-center text-3xl mb-8 tracking-widest w-64" autofocus>
+        <button onclick="checkOwner()" class="border border-green-500 px-12 py-3 hover:bg-green-500 hover:text-black transition font-bold">DECRYPT</button>
     </div>
 
-    <div id="main" class="max-w-6xl mx-auto hidden">
-        <header class="flex justify-between border-b border-green-900 pb-5 mb-10">
-            <h1 class="text-2xl font-bold">PRO_ROOT_v1.2</h1>
-            <span id="status" class="text-xs">○ WAITING...</span>
-        </header>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 glitch p-6 rounded bg-black/50">
-                <h3 class="text-xs mb-4 text-green-700">LIVE_NODE_LOGS</h3>
-                <div id="logs" class="h-[500px] overflow-y-auto space-y-2 text-[10px]"></div>
-                <button onclick="loadLogs()" class="w-full mt-4 border border-green-800 py-2 hover:bg-green-900">REFRESH</button>
+    <div id="panel" class="max-w-7xl mx-auto hidden">
+        <div class="flex justify-between items-center border-b border-green-900 pb-4 mb-8">
+            <h1 class="text-xl font-black tracking-tighter">OWNER_INTERFACE_v2.4_ROOT</h1>
+            <div class="flex gap-4">
+                <button onclick="location.href='index.html'" class="text-[10px] border border-green-800 px-4 py-1 hover:bg-green-900 transition font-bold">ASOSIY SAHIFA</button>
+                <span id="ping" class="text-[10px] animate-pulse">● SYSTEM_IDLE</span>
             </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-3 owner-border p-6 rounded bg-black/40">
+                <h3 class="text-xs font-bold mb-6 text-green-700 uppercase tracking-widest">Foydalanuvchi faolligi & Xavfsizlik</h3>
+                <div id="logs" class="h-[600px] overflow-y-auto space-y-3 font-mono text-[10px]">
+                    <p class="opacity-20 text-center py-20 italic">Ma'lumotlar oqimi kutilmoqda...</p>
+                </div>
+            </div>
+
             <div class="space-y-6">
-                <div class="glitch p-6 rounded">
-                    <h3 class="text-xs mb-4 text-green-700">FIREWALL_CONFIG</h3>
-                    <input type="text" id="word" class="w-full bg-transparent border border-green-900 p-2 text-xs mb-3 outline-none" placeholder="Keyword...">
-                    <button onclick="addWord()" class="w-full bg-green-900 text-black font-bold py-2 text-xs">INJECT</button>
+                <div class="owner-border p-6 rounded bg-black/40">
+                    <h3 class="text-xs font-bold mb-4 text-green-700 uppercase">Taqiqlangan so'z qo'shish</h3>
+                    <input type="text" id="newWord" class="w-full text-xs p-2 mb-4" placeholder="So'zni kiriting...">
+                    <button onclick="addBadword()" class="w-full bg-green-900/20 border border-green-500 py-2 text-[10px] font-bold hover:bg-green-500 hover:text-black transition">TIZIMGA KIRITISH</button>
+                </div>
+
+                <div class="owner-border p-6 rounded bg-black/40 text-center">
+                    <h3 class="text-xs font-bold mb-4 text-green-700 uppercase">Tizim holati</h3>
+                    <div class="text-2xl font-black" id="logCount">0</div>
+                    <p class="text-[8px] opacity-50 mt-1">UMUMIY QIDIRUVLAR</p>
                 </div>
             </div>
         </div>
@@ -41,43 +53,53 @@
 
     <script>
         const API = "/.netlify/functions/get-yt-data";
-        let PASS = "";
+        let PASSWORD = "";
 
-        function login() {
-            PASS = document.getElementById('pass').value;
-            document.getElementById('auth').classList.add('hidden');
-            document.getElementById('main').classList.remove('hidden');
-            loadLogs();
+        function checkOwner() {
+            const p = document.getElementById('rootPass').value;
+            if(p === "YtAdmins") {
+                PASSWORD = p;
+                document.getElementById('auth').classList.add('hidden');
+                document.getElementById('panel').classList.remove('hidden');
+                refreshLogs();
+            } else { alert("ACCESS DENIED"); location.reload(); }
         }
 
-        async function loadLogs() {
-            document.getElementById('status').innerText = "○ CONNECTING...";
-            const res = await fetch(API, { method:'POST', body: JSON.stringify({ action:'get_logs', password:PASS })});
+        async function refreshLogs() {
+            document.getElementById('ping').innerText = "○ FETCHING...";
+            const res = await fetch(API, { method:'POST', body: JSON.stringify({ action:'get_logs', password:PASSWORD })});
             const logs = await res.json();
-            const cont = document.getElementById('logs');
-            cont.innerHTML = logs.map(l => `
-                <div class="flex justify-between items-center border-b border-green-900/30 py-2">
-                    <span>> ${l.channel_username} <span class="opacity-30">[${l.ip_address}]</span></span>
-                    <div class="flex gap-2">
-                        <button onclick="act('${l.ip_address}', 'toggle_block')" class="text-red-500 hover:underline">BLOCK</button>
-                        <button onclick="act('${l.ip_address}', 'whitelist_ip')" class="text-blue-500 hover:underline">UNBLOCK</button>
+            
+            document.getElementById('logCount').innerText = logs.length;
+            const container = document.getElementById('logs');
+            container.innerHTML = logs.map(l => `
+                <div class="flex justify-between items-center border-b border-green-900/20 py-3 hover:bg-green-900/10 transition px-2">
+                    <div class="flex flex-col">
+                        <span class="text-green-400 font-bold">${l.channel_username}</span>
+                        <span class="opacity-30 text-[8px]">${l.ip_address} | ${new Date(l.created_at).toLocaleString()}</span>
+                    </div>
+                    <div class="flex gap-4 font-bold text-[9px]">
+                        <button onclick="executeAction('${l.ip_address}', 'toggle_block')" class="text-red-600 hover:text-white transition">[BLOCK]</button>
+                        <button onclick="executeAction('${l.ip_address}', 'whitelist_ip')" class="text-blue-500 hover:text-white transition">[UNBLOCK]</button>
                     </div>
                 </div>
             `).join('');
-            document.getElementById('status').innerText = "● ONLINE";
+            document.getElementById('ping').innerText = "● ONLINE";
         }
 
-        async function act(ip, type) {
-            await fetch(API, { method:'POST', body: JSON.stringify({ action:type, password:PASS, ip_address:ip })});
-            alert("EXECUTED");
-            loadLogs();
+        async function executeAction(ip, act) {
+            if(!confirm(`Haqiqatdan ham ushbu amalni [${act}] bajarmoqchimisiz? IP: ${ip}`)) return;
+            await fetch(API, { method:'POST', body: JSON.stringify({ action:act, password:PASSWORD, ip_address:ip })});
+            alert("SUCCESS: PROTOCOL_EXECUTED");
+            refreshLogs();
         }
 
-        async function addWord() {
-            const w = document.getElementById('word').value;
-            await fetch(API, { method:'POST', body: JSON.stringify({ action:'add_badword', password:PASS, word:w })});
-            alert("INJECTED");
-            document.getElementById('word').value = "";
+        async function addBadword() {
+            const word = document.getElementById('newWord').value;
+            if(!word) return;
+            await fetch(API, { method:'POST', body: JSON.stringify({ action:'add_badword', password:PASSWORD, word })});
+            alert("SUCCESS: KEYWORD_INJECTED");
+            document.getElementById('newWord').value = "";
         }
     </script>
 </body>
