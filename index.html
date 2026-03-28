@@ -3,108 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT ANALYST PRO</title>
+    <title>YT ANALYST PRO v2.4 | Intellektual Tahlil</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #050507; color: white; font-family: sans-serif; }
+        body { background: #050507; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 2rem; }
+        .stat-card { background: rgba(255, 255, 255, 0.03); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.4s; }
+        .stat-card:hover { background: rgba(239, 68, 68, 0.05); transform: translateY(-5px); border-color: #ef4444; }
         .hidden { display: none !important; }
-        .loader { width: 30px; height: 30px; border: 3px solid #111; border-bottom-color: #ef4444; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
+        .loader { width: 40px; height: 40px; border: 4px solid #111; border-bottom-color: #ef4444; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
     </style>
 </head>
-<body class="p-5 md:p-10">
-    <div class="max-w-5xl mx-auto">
-        <header class="text-center mb-10">
-            <h1 class="text-5xl font-black italic tracking-tighter uppercase">YT<span class="text-red-600">PRO</span></h1>
-            <p class="text-gray-500 text-[10px] tracking-widest mt-2 uppercase font-bold">Deep Data Analysis</p>
+<body class="p-4 md:p-10">
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-16">
+            <h1 class="text-6xl font-black italic tracking-tighter uppercase">YT<span class="text-red-600">PRO</span></h1>
+            <p class="text-gray-500 text-[10px] tracking-[0.5em] mt-3 font-bold uppercase underline decoration-red-600">Deep Neural Analysis v2.4</p>
         </header>
 
-        <div id="searchBox" class="glass p-2 flex flex-col md:flex-row gap-2 mb-10">
-            <input type="text" id="channelInput" placeholder="Kanal @handle..." class="flex-grow bg-transparent p-5 outline-none text-lg rounded-2xl">
-            <button onclick="getStats()" class="bg-red-600 hover:bg-red-700 px-12 py-5 rounded-2xl font-bold uppercase transition">ANALIZ</button>
+        <div id="searchBox" class="glass p-3 flex flex-col md:flex-row gap-3 mb-16 transition-all shadow-2xl">
+            <input type="text" id="channelInput" placeholder="Kanal @handle yoki havolasini kiriting..." class="flex-grow bg-transparent p-6 outline-none text-xl font-light rounded-2xl">
+            <button onclick="getStatistics()" class="bg-red-600 hover:bg-red-700 px-16 py-6 rounded-2xl font-black uppercase tracking-widest transition active:scale-95 shadow-lg shadow-red-900/20">ANALIZ QILISH</button>
         </div>
 
-        <div id="loading" class="hidden flex justify-center py-10"><span class="loader"></span></div>
+        <div id="loading" class="hidden flex flex-col items-center py-20"><span class="loader mb-4"></span><p class="text-gray-500 text-xs animate-pulse">ALGORITMLAR HISOBLANMOQDA...</p></div>
 
-        <div id="result" class="hidden space-y-8">
-            <div class="glass p-8 flex flex-col md:flex-row items-center gap-10">
-                <img id="avatar" class="w-40 h-40 rounded-[2.5rem] object-cover border-4 border-white/5">
+        <div id="result" class="hidden space-y-10 animate-in fade-in duration-1000">
+            <div class="glass p-8 md:p-12 flex flex-col md:flex-row items-center gap-12">
+                <img id="avatar" class="w-48 h-48 rounded-[3rem] object-cover border-8 border-white/5 shadow-2xl">
                 <div class="flex-grow text-center md:text-left">
-                    <h2 id="name" class="text-4xl font-black mb-1"></h2>
-                    <p id="handle" class="text-red-600 font-mono text-sm mb-6"></p>
+                    <h2 id="name" class="text-5xl font-black mb-2"></h2>
+                    <p id="handle" class="text-red-600 font-mono text-xl mb-8"></p>
                     <div id="mainGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-2 glass p-8 grid grid-cols-1 sm:grid-cols-2 gap-6" id="detailGrid"></div>
-                <div class="glass p-8 flex flex-col items-center justify-center text-center">
-                    <p class="text-[10px] text-gray-500 uppercase mb-4">Channel Rank</p>
-                    <div id="rank" class="text-8xl font-black text-red-600 italic"></div>
-                    <p id="status" class="text-xs font-bold uppercase mt-2"></p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 glass p-10 space-y-8">
+                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest border-b border-white/5 pb-4 italic">Yashirin Metrikalar (Deep Data)</h3>
+                    <div id="deepGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-8"></div>
+                </div>
+                <div class="glass p-10 flex flex-col items-center justify-center text-center bg-gradient-to-t from-red-600/10 to-transparent">
+                    <p class="text-[10px] text-gray-500 uppercase mb-8">Kanalning Umumiy Reytingi</p>
+                    <div id="rank" class="text-[10rem] font-black italic text-red-600 leading-none mb-4"></div>
+                    <p id="status" class="text-lg font-bold tracking-widest uppercase"></p>
                 </div>
             </div>
 
-            <div class="glass p-8">
-                <h3 class="text-xs font-black text-gray-500 uppercase mb-4">Description</h3>
-                <p id="desc" class="text-sm text-gray-400 leading-relaxed italic"></p>
+            <div class="glass p-10">
+                <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-8 border-b border-white/5 pb-4">Eng yuqori natijali videolar (Oxirgi yuklamalardan)</h3>
+                <div id="topVideos" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
             </div>
         </div>
     </div>
 
+    <footer class="mt-20 text-center opacity-30 hover:opacity-100 transition duration-500">
+        <a href="admin.html" class="text-[10px] tracking-[0.5em] font-mono cursor-pointer hover:text-red-600 transition">SYSTEM ACCESS v2.4 // OWNER_ONLY</a>
+    </footer>
+
     <script>
-        async function getStats() {
-            const input = document.getElementById('channelInput').value;
-            if(!input) return;
+        async function getStatistics() {
+            const input = document.getElementById('channelInput').value.trim();
+            if (!input) return;
+
+            // 20 daqiqalik Mute tekshiruvi
+            const muteUntil = localStorage.getItem('mute_until');
+            if (muteUntil && new Date().getTime() < muteUntil) {
+                const remains = Math.ceil((muteUntil - new Date().getTime()) / 60000);
+                alert(`🚨 TIZIM CHEKLOVI: Ko'p urinishlar sababli siz bloklangansiz. Qolgan vaqt: ${remains} daqiqa.`);
+                return;
+            }
+
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('result').classList.add('hidden');
 
             try {
-                const res = await fetch('/.netlify/functions/get-yt-data', { method:'POST', body: JSON.stringify({username: input}) });
+                const res = await fetch('/.netlify/functions/get-yt-data', {
+                    method: 'POST',
+                    body: JSON.stringify({ username: input })
+                });
+                
+                if (res.status === 403) { alert("⚠️ IP manzilingiz bloklangan!"); return; }
                 const data = await res.json();
-                if(data.channel) render(data); else alert("Kanal topilmadi");
-            } catch(e) { alert("Xatolik"); }
+
+                // Badword Strike Tizimi
+                if (data.badwords && data.badwords.some(w => input.toLowerCase().includes(w.toLowerCase()))) {
+                    handleStrike();
+                    return;
+                }
+
+                if (data.channel) renderUI(data); else alert("Kanal topilmadi!");
+            } catch (e) { alert("Ulanish xatosi!"); }
             finally { document.getElementById('loading').classList.add('hidden'); }
         }
 
-        function render(data) {
+        function handleStrike() {
+            let strikes = parseInt(localStorage.getItem('strikes') || '0') + 1;
+            localStorage.setItem('strikes', strikes);
+            if (strikes >= 3) {
+                const muteTime = new Date().getTime() + 20 * 60 * 1000;
+                localStorage.setItem('mute_until', muteTime);
+                localStorage.setItem('strikes', '0');
+                alert("🚨 3X ALERT! Qoidabuzarlik sababli 20 daqiqaga mute berildi.");
+            } else {
+                alert(`⚠️ TAQIQLANGAN SO'Z! Ogohlantirish: ${strikes}/3`);
+            }
+        }
+
+        function renderUI(data) {
             const c = data.channel, vids = data.recentVideos || [];
             document.getElementById('result').classList.remove('hidden');
             document.getElementById('name').innerText = c.snippet.title;
             document.getElementById('handle').innerText = c.snippet.customUrl || "@" + c.snippet.title;
             document.getElementById('avatar').src = c.snippet.thumbnails.high.url;
-            document.getElementById('desc').innerText = c.snippet.description || "No desc.";
 
             const subs = parseInt(c.statistics.subscriberCount) || 1;
             const views = parseInt(c.statistics.viewCount) || 0;
             const totalVids = parseInt(c.statistics.videoCount) || 1;
 
-            let rAvg = 0, loyalty = 0, freq = 0;
-            if(vids.length > 0) {
-                rAvg = Math.floor(vids.reduce((a, v) => a + parseInt(v.statistics.viewCount || 0), 0) / vids.length);
-                loyalty = ((rAvg / subs) * 100).toFixed(2);
-                const diff = (new Date(vids[0].snippet.publishedAt) - new Date(vids[vids.length-1].snippet.publishedAt))/(1000*60*60*24) || 1;
-                freq = (vids.length / (diff / 7)).toFixed(1);
-            }
+            // Murakkab hisob-kitoblar
+            const avgViews = Math.floor(vids.reduce((a, b) => a + parseInt(b.statistics.viewCount), 0) / vids.length);
+            const engagement = ((avgViews / subs) * 100).toFixed(2);
+            const watchPotential = (views * 0.07).toFixed(0); // Taxminiy algoritmik hisob
+            const velocity = (avgViews / (totalVids / 10)).toFixed(0); // Tarqalish tezligi
 
+            // Asosiy Grid
             document.getElementById('mainGrid').innerHTML = `
-                <div class="stat-card"><p class="text-[9px] text-gray-500 mb-1">Loyalty</p><p class="text-xl font-bold text-blue-500">${loyalty}%</p></div>
-                <div class="stat-card"><p class="text-[9px] text-gray-500 mb-1">Real Avg Views</p><p class="text-xl font-bold">${rAvg.toLocaleString()}</p></div>
-                <div class="stat-card"><p class="text-[9px] text-gray-500 mb-1">Frequency</p><p class="text-xl font-bold">${freq} v/w</p></div>
-                <div class="stat-card"><p class="text-[9px] text-gray-500 mb-1">Watch Hours</p><p class="text-xl font-bold text-yellow-500">~${Math.floor(views * 0.06).toLocaleString()}</p></div>
+                <div class="stat-card border-l-4 border-red-600">
+                    <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Obunachilar</p>
+                    <p class="text-2xl font-black">${subs.toLocaleString()}</p>
+                </div>
+                <div class="stat-card border-l-4 border-blue-600">
+                    <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Haqiqiy Faollik</p>
+                    <p class="text-2xl font-black text-blue-500">${engagement}%</p>
+                </div>
+                <div class="stat-card border-l-4 border-green-600">
+                    <p class="text-[9px] text-gray-500 uppercase font-black mb-1">O'rtacha Ko'rish</p>
+                    <p class="text-2xl font-black">${avgViews.toLocaleString()}</p>
+                </div>
+                <div class="stat-card border-l-4 border-yellow-600">
+                    <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Watch Hours</p>
+                    <p class="text-2xl font-black text-yellow-500">~${parseInt(watchPotential).toLocaleString()}</p>
+                </div>
             `;
 
-            document.getElementById('detailGrid').innerHTML = `
-                <div class="border-l-2 border-red-600 pl-4"><p class="text-[10px] text-gray-500">Momentum</p><p class="font-bold">${rAvg > (views/totalVids) ? 'O\'SISHDA' : 'BARQAROR'}</p></div>
-                <div class="border-l-2 border-red-600 pl-4"><p class="text-[10px] text-gray-500">Node Age</p><p class="font-bold">${Math.floor((new Date() - new Date(c.snippet.publishedAt))/(1000*60*60*24))} Kun</p></div>
-                <div class="border-l-2 border-red-600 pl-4"><p class="text-[10px] text-gray-500">Total Views</p><p class="font-bold">${views.toLocaleString()}</p></div>
-                <div class="border-l-2 border-red-600 pl-4"><p class="text-[10px] text-gray-500">Strategy</p><p class="font-bold">${freq > 3 ? 'Aggressive' : 'Consistent'}</p></div>
+            // Deep Grid
+            document.getElementById('deepGrid').innerHTML = `
+                <div class="p-6 bg-white/5 rounded-2xl">
+                    <p class="text-[10px] text-gray-500 uppercase mb-2">Kontentning tarqalish tezligi</p>
+                    <p class="text-xl font-bold">${velocity} pts/sec</p>
+                </div>
+                <div class="p-6 bg-white/5 rounded-2xl">
+                    <p class="text-[10px] text-gray-500 uppercase mb-2">Kanalning O'sish Momentum</p>
+                    <p class="text-xl font-bold text-green-500">${avgViews > (views/totalVids) ? 'Ijobiy (Trending)' : 'Barqaror'}</p>
+                </div>
             `;
 
-            const rank = subs > 1000000 ? "S+" : (subs > 100000 ? "A" : "B");
-            document.getElementById('rank').innerText = rank;
-            document.getElementById('status').innerText = subs > 1000000 ? "Neural Alpha" : "Stable Node";
+            // Top Videos
+            document.getElementById('topVideos').innerHTML = vids.slice(0, 3).map(v => `
+                <div class="bg-black/40 p-4 rounded-3xl border border-white/5">
+                    <img src="${v.snippet.thumbnails.medium.url}" class="w-full rounded-2xl mb-4">
+                    <h4 class="text-xs font-bold line-clamp-2 mb-2">${v.snippet.title}</h4>
+                    <p class="text-[10px] text-red-600 font-bold">${parseInt(v.statistics.viewCount).toLocaleString()} ko'rish</p>
+                </div>
+            `).join('');
+
+            // Rank
+            let r = subs > 1000000 ? "S+" : (subs > 100000 ? "A" : "B");
+            document.getElementById('rank').innerText = r;
+            document.getElementById('status').innerText = subs > 1000000 ? "GLOBAL LEGEND" : "RISING STAR";
         }
     </script>
 </body>
