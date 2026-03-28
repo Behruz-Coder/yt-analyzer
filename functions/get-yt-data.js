@@ -1,72 +1,53 @@
 const axios = require('axios');
 
-exports.handler = async (event, context) => {
-    // Faqat POST so'rovlarini qabul qilamiz
-    if (event.httpMethod !== "POST") {
-        return { 
-            statusCode: 405, 
-            body: JSON.stringify({ error: "Faqat POST so'rovi qabul qilinadi" }) 
-        };
-    }
+exports.handler = async (event) => {
+    if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
 
-    // Foydalanuvchi yuborgan kanal nomini olish
     const { username } = JSON.parse(event.body);
-    // Kiruvchining IP manzilini aniqlash
     const userIP = event.headers['x-nf-client-connection-ip'] || 'nomaʼlum';
+    const userAgent = event.headers['user-agent'] || 'nomaʼlum qurilma'; // Qurilma va brauzer ma'lumoti
 
-    // Netlify sozlamalaridan kalitlarni olish
     const { YT_API_KEY, SUPABASE_URL, SUPABASE_KEY } = process.env;
 
     try {
-        // 1. YouTube-dan kanalni qidirish (ID sini topish uchun)
-        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(username)}&key=${YT_API_KEY}&maxResults=1`;
-        const searchRes = await axios.get(searchUrl);
-
-        if (!searchRes.data.items || searchRes.data.items.length === 0) {
-            return { 
-                statusCode: 404, 
-                body: JSON.stringify({ error: "Kanal topilmadi" }) 
-            };
-        }
-
-        const channelId = searchRes.data.items[0].id.channelId;
-
-        // 2. Kanalning to'liq statistikasini olish
-        const statsUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelId}&key=${YT_API_KEY}`;
-        const statsRes = await axios.get(statsUrl);
-        const channelData = statsRes.data.items[0];
-
-        // 3. Supabase-ga submit ma'lumotlarini (Log) saqlash
-        // Supabase REST API orqali 'logs' jadvaliga yozamiz
+        // 1. IP orqali joylashuvni aniqlash (bepul API)
+        let locationData = "Aniqlanmadi";
         try {
-            await axios.post(`${SUPABASE_URL}/rest/v1/logs`, {
-                channel_username: username,
-                ip_address: userIP
-            }, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                }
-            });
-        } catch (dbError) {
-            console.error("Bazaga yozishda xatolik:", dbError.message);
-            // Bazaga yozilmasa ham foydalanuvchiga YouTube ma'lumotlarini ko'rsataveramiz
-        }
+            const geoRes = await axios.get(`http://ip-api.com/json/${userIP}`);
+            if (geoRes.data.status === 'success') {
+                locationData = `${geoRes.data.country}, ${geoRes.data.city} (Provayder: ${geoRes.data.isp})`;
+            }
+        } catch (e) { console.log("Geo xato"); }
 
-        // 4. Muvaffaqiyatli natijani qaytarish
+        // 2. YouTube ma'lumotlarini olish (Search qismi)
+        const searchRes = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(username)}&key=${YT_API_KEY}&maxResults=1`);
+        
+        if (!searchRes.data.items || searchRes.data.items.length === 0) {
+            throw new Error("Kanal topilmadi");
+        }
+        const channelId = searchRes.data.items[0].id.channelId;
+        const statsRes = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelId}&key=${YT_API_KEY}`);
+
+        // 3. Supabase-ga batafsil Log yozish
+        await axios.post(`${SUPABASE_URL}/rest/v1/logs`, {
+            channel_username: username,
+            ip_address: userIP,
+            device_info: userAgent,
+            location: locationData
+        }, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
         return {
             statusCode: 200,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(channelData)
+            body: JSON.stringify(statsRes.data.items[0])
         };
 
     } catch (error) {
-        console.error("Xatolik:", error.response ? error.response.data : error.message);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "YouTube API bilan bog'lanishda xatolik yuz berdi" })
-        };
+        return { statusCode: 400, body: JSON.stringify({ error: error.message }) };
     }
 };
