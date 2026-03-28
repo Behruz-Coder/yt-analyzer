@@ -3,83 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT Pro Analytics - Dashboard</title>
+    <title>YT Pro Analytics - Xavfsiz Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #0a0a0c; color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        body { background: #0a0a0c; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .stat-card { border-bottom: 4px solid #ef4444; transition: 0.3s; }
         .stat-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.06); }
+        .danger-glow { animation: pulse-red 2s infinite; border: 1px solid rgba(239, 68, 68, 0.5); }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .blocked-input { cursor: not-allowed; opacity: 0.5; background: rgba(255,0,0,0.05) !important; }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
     <div class="max-w-6xl mx-auto">
         <div class="text-center mb-12">
-            <h1 class="text-5xl font-black italic tracking-tighter">PRO<span class="text-red-600">STATS</span></h1>
-            <p class="text-gray-500 text-xs mt-2 uppercase tracking-[0.3em]">YouTube Deep Analysis Tool</p>
+            <h1 class="text-5xl font-black italic tracking-tighter uppercase">YT<span class="text-red-600">Analyst</span></h1>
+            <p class="text-gray-500 text-[10px] mt-2 uppercase tracking-[0.4em]">Professional Security & Analysis System</p>
         </div>
 
-        <div class="glass p-4 rounded-2xl flex flex-col md:flex-row gap-4 mb-10 shadow-2xl">
+        <div id="searchBox" class="glass p-4 rounded-2xl flex flex-col md:flex-row gap-4 mb-10 shadow-2xl transition-all">
             <input type="text" id="channelInput" placeholder="Kanal nomi yoki @handle..." 
-                class="flex-grow bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-red-600 transition">
-            <button onclick="getStatistics()" class="bg-red-600 hover:bg-red-700 px-8 py-4 rounded-xl font-bold transition-all">TAHLIL QILISH</button>
+                class="flex-grow bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-red-600 transition text-white">
+            <button onclick="getStatistics()" id="searchBtn" class="bg-red-600 hover:bg-red-700 px-10 py-4 rounded-xl font-bold transition-all active:scale-95 whitespace-nowrap">
+                TAHLIL
+            </button>
         </div>
 
-        <div id="loading" class="hidden text-center py-10"><div class="animate-spin h-10 w-10 border-4 border-red-600 border-t-transparent rounded-full mx-auto"></div></div>
+        <div id="loading" class="hidden text-center py-10">
+            <div class="animate-spin h-10 w-10 border-4 border-red-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-gray-500 animate-pulse text-sm font-mono">Xavfsiz ulanish o'rnatilmoqda...</p>
+        </div>
 
         <div id="result" class="hidden space-y-6">
             <div class="glass p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
-                <div id="chanCountry" class="absolute top-0 right-0 bg-red-600 px-4 py-1 text-[10px] font-bold rounded-bl-lg"></div>
-                <img id="avatar" class="w-32 h-32 rounded-3xl border-4 border-white/5 shadow-2xl">
+                <div id="chanCountry" class="absolute top-0 right-0 bg-red-600 px-6 py-2 text-[10px] font-bold rounded-bl-2xl uppercase"></div>
+                <img id="avatar" src="" class="w-32 h-32 rounded-3xl border-4 border-white/5 shadow-2xl object-cover">
                 <div class="text-center md:text-left">
-                    <h2 id="name" class="text-4xl font-black"></h2>
-                    <p id="handle" class="text-red-500 font-mono text-sm"></p>
-                    <p id="desc" class="text-gray-400 text-sm mt-3 line-clamp-2 max-w-2xl"></p>
+                    <h2 id="name" class="text-4xl font-black tracking-tight"></h2>
+                    <p id="handle" class="text-red-500 font-mono text-sm mt-1"></p>
+                    <p id="desc" class="text-gray-400 text-sm mt-4 line-clamp-2 max-w-2xl"></p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="glass p-6 rounded-2xl stat-card">
-                    <span class="text-gray-500 text-[10px] font-bold uppercase">Obunachilar</span>
-                    <div id="subs" class="text-3xl font-black mt-1"></div>
+                    <span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Obunachilar</span>
+                    <div id="subs" class="text-3xl font-black mt-2"></div>
                 </div>
                 <div class="glass p-6 rounded-2xl stat-card !border-blue-600">
-                    <span class="text-gray-500 text-[10px] font-bold uppercase">Ko'rishlar</span>
-                    <div id="views" class="text-3xl font-black mt-1 text-blue-400"></div>
+                    <span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Ko'rishlar</span>
+                    <div id="views" class="text-3xl font-black mt-2 text-blue-400"></div>
                 </div>
                 <div class="glass p-6 rounded-2xl stat-card !border-green-600">
-                    <span class="text-gray-500 text-[10px] font-bold uppercase">Videolar</span>
-                    <div id="vids" class="text-3xl font-black mt-1 text-green-400"></div>
+                    <span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Videolar</span>
+                    <div id="vids" class="text-3xl font-black mt-2 text-green-400"></div>
                 </div>
                 <div class="glass p-6 rounded-2xl stat-card !border-yellow-600">
-                    <span class="text-gray-500 text-[10px] font-bold uppercase">Ochilgan yil</span>
-                    <div id="year" class="text-3xl font-black mt-1 text-yellow-500"></div>
+                    <span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Ochilgan yil</span>
+                    <div id="year" class="text-3xl font-black mt-2 text-yellow-500"></div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass p-8 rounded-3xl">
-                    <h3 class="text-xl font-bold mb-6 text-red-500 italic">Yashirin Statistika (Audit)</h3>
-                    <div class="space-y-4 text-sm">
-                        <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span class="text-gray-400">Natija koeffitsienti:</span>
+                <div class="glass p-8 rounded-3xl border border-white/5 relative">
+                    <div class="absolute -top-3 left-8 bg-red-600 px-3 py-1 rounded text-[10px] font-bold italic">PRO AUDIT</div>
+                    <h3 class="text-xl font-bold mb-8 mt-2 text-gray-200">Yashirin Tahlil</h3>
+                    <div class="space-y-5">
+                        <div class="flex justify-between border-b border-white/5 pb-3">
+                            <span class="text-gray-400">Natija (Engagement):</span>
                             <span id="engRate" class="font-bold text-green-400"></span>
                         </div>
-                        <div class="flex justify-between border-b border-white/5 pb-2">
-                            <span class="text-gray-400">Kanal quvvati (Score):</span>
+                        <div class="flex justify-between border-b border-white/5 pb-3">
+                            <span class="text-gray-400">Kanal quvvati:</span>
                             <span id="power" class="font-bold text-blue-400"></span>
                         </div>
-                        <div class="flex justify-between border-b border-white/5 pb-2">
+                        <div class="flex justify-between border-b border-white/5 pb-3">
                             <span class="text-gray-400">Tahminiy oylik daromad:</span>
                             <span id="rev" class="font-bold text-yellow-500"></span>
                         </div>
                     </div>
-                    <div id="topics" class="mt-6 flex flex-wrap gap-2"></div>
                 </div>
 
                 <div class="glass p-8 rounded-3xl">
-                    <h3 class="text-xl font-bold mb-6">Eng mashhur videolar</h3>
+                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">🔥 Top Videolar</h3>
                     <div id="videoList" class="space-y-4"></div>
                 </div>
             </div>
@@ -87,44 +96,118 @@
     </div>
 
     <script>
-        const badWords = ["haqorat", "yomon", "xunuk", "18plus"]; // O'zingiz qo'shing
+        // Sahifa yuklanganda blok holatini tekshirish
+        window.onload = function() {
+            checkBlockStatus();
+        };
+
+        function checkBlockStatus() {
+            const blockUntil = localStorage.getItem('blockUntil');
+            const searchBtn = document.getElementById('searchBtn');
+            const inputField = document.getElementById('channelInput');
+            const searchBox = document.getElementById('searchBox');
+
+            if (blockUntil) {
+                const now = new Date().getTime();
+                const timeLeft = blockUntil - now;
+
+                if (timeLeft > 0) {
+                    const minutesLeft = Math.ceil(timeLeft / (1000 * 60));
+                    searchBtn.disabled = true;
+                    searchBtn.classList.replace('bg-red-600', 'bg-gray-800');
+                    searchBtn.innerText = `BLOK (${minutesLeft} min)`;
+                    inputField.disabled = true;
+                    inputField.classList.add('blocked-input');
+                    inputField.placeholder = `Blokdan chiqishga ${minutesLeft} daqiqa qoldi...`;
+                    searchBox.classList.add('danger-glow');
+                    
+                    // Har 30 soniyada vaqtni yangilab turish
+                    setTimeout(checkBlockStatus, 30000); 
+                } else {
+                    localStorage.removeItem('blockUntil');
+                    localStorage.removeItem('userStrikes');
+                    location.reload(); // Sahifani tozalash
+                }
+            }
+        }
 
         async function getStatistics() {
-            const input = document.getElementById('channelInput').value.trim();
-            if (!input) return;
+            const inputField = document.getElementById('channelInput');
+            const rawInput = inputField.value.trim();
+            if (!rawInput) return;
 
-            // Xavfsizlik filtri
-            if (badWords.some(w => input.toLowerCase().includes(w))) {
-                alert("DIQQAT! Taqiqlangan so'z aniqlandi. Qurilmangiz: " + navigator.platform + " va IP manzilingiz qayd etildi!");
-                return;
+            try {
+                const bwRes = await fetch('badwords.json');
+                const badWords = await bwRes.json();
+                const cleanInput = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
+                
+                const isForbidden = badWords.some(word => cleanInput.includes(word.toLowerCase()));
+
+                if (isForbidden) {
+                    handleBadUser(rawInput);
+                    return;
+                }
+
+                processSearch(rawInput);
+            } catch (err) {
+                console.error(err);
+                alert("Tizim hatosi!");
+            }
+        }
+
+        function handleBadUser(input) {
+            let strikes = parseInt(localStorage.getItem('userStrikes') || '0');
+            strikes++;
+            localStorage.setItem('userStrikes', strikes);
+
+            if (strikes === 1) {
+                alert("⚠️ OGOHLANTIRISH!\nTaqiqlangan so'z ishlatildi. Odobli bo'ling!");
+            } else if (strikes === 2) {
+                alert("‼️ DIQQAT!\nKeyingi safar 1 soatga bloklanasiz!");
+            } else {
+                const blockTime = new Date().getTime() + 3600000; // 1 soat
+                localStorage.setItem('blockUntil', blockTime);
+                alert("🚫 1 SOATGA BLOKLANDINGIZ!\nMa'lumotlaringiz admin panelga yuborildi.");
+                checkBlockStatus();
             }
 
-            document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('result').classList.add('hidden');
+            fetch('/.netlify/functions/get-yt-data', {
+                method: 'POST',
+                body: JSON.stringify({ username: `🚨 STRIKE ${strikes}: ` + input })
+            });
+        }
+
+        async function processSearch(input) {
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            resultDiv.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
 
             try {
                 const res = await fetch('/.netlify/functions/get-yt-data', {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: input })
                 });
+                
                 const data = await res.json();
                 
                 if (res.ok) {
                     const c = data.channel;
                     const s = c.statistics;
-                    
-                    document.getElementById('avatar').src = c.snippet.thumbnails.high.url;
-                    document.getElementById('name').innerText = c.snippet.title;
-                    document.getElementById('handle').innerText = c.snippet.customUrl || "";
-                    document.getElementById('desc').innerText = c.snippet.description;
-                    document.getElementById('chanCountry').innerText = c.snippet.country || "GLOBAL";
-                    
+                    const sn = c.snippet;
+
+                    document.getElementById('avatar').src = sn.thumbnails.high.url;
+                    document.getElementById('name').innerText = sn.title;
+                    document.getElementById('handle').innerText = sn.customUrl || "";
+                    document.getElementById('desc').innerText = sn.description;
+                    document.getElementById('chanCountry').innerText = sn.country || "GLOBAL";
                     document.getElementById('subs').innerText = Number(s.subscriberCount).toLocaleString();
                     document.getElementById('views').innerText = Number(s.viewCount).toLocaleString();
                     document.getElementById('vids').innerText = Number(s.videoCount).toLocaleString();
-                    document.getElementById('year').innerText = new Date(c.snippet.publishedAt).getFullYear();
+                    document.getElementById('year').innerText = new Date(sn.publishedAt).getFullYear();
 
-                    // Audit Hisoblash
+                    // Audit calculation
                     const eng = ((s.viewCount / s.subscriberCount) / 10).toFixed(2);
                     document.getElementById('engRate').innerText = eng + "%";
                     const pwr = Math.min(100, (s.subscriberCount / 10000) + (s.videoCount / 50)).toFixed(1);
@@ -132,21 +215,29 @@
                     const monthly = Math.floor((s.viewCount / 1000) * 0.2 / 12);
                     document.getElementById('rev').innerText = "$" + monthly.toLocaleString() + " - $" + (monthly*5).toLocaleString();
 
-                    // Mashhur videolar
+                    // Videos list
                     const list = document.getElementById('videoList');
                     list.innerHTML = "";
                     data.popularVideos.forEach(v => {
                         list.innerHTML += `
-                            <a href="https://youtube.com/watch?v=${v.id.videoId}" target="_blank" class="flex items-center gap-4 p-2 hover:bg-white/5 rounded-xl transition">
-                                <img src="${v.snippet.thumbnails.default.url}" class="w-20 rounded-lg">
-                                <p class="text-xs font-bold line-clamp-2">${v.snippet.title}</p>
+                            <a href="https://youtube.com/watch?v=${v.id.videoId}" target="_blank" class="flex items-center gap-4 p-3 hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/10 transition group">
+                                <img src="${v.snippet.thumbnails.default.url}" class="w-20 rounded-xl group-hover:scale-105 transition">
+                                <div class="overflow-hidden">
+                                    <p class="text-xs font-bold line-clamp-2 text-gray-200">${v.snippet.title}</p>
+                                    <span class="text-[10px] text-red-500 font-bold mt-1 inline-block uppercase">Tomosha qilish →</span>
+                                </div>
                             </a>`;
                     });
 
-                    document.getElementById('result').classList.remove('hidden');
+                    resultDiv.classList.remove('hidden');
+                } else {
+                    alert("Kanal topilmadi!");
                 }
-            } catch (e) { alert("Xato: " + e.message); }
-            finally { document.getElementById('loading').classList.add('hidden'); }
+            } catch (e) {
+                alert("Xato: Aloqa uzildi!");
+            } finally {
+                loadingDiv.classList.add('hidden');
+            }
         }
     </script>
 </body>
