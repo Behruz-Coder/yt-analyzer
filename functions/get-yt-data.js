@@ -1,54 +1,66 @@
 const axios = require('axios');
 
 exports.handler = async (event) => {
-    if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
-    
-    const { username } = JSON.parse(event.body);
-    const userIP = event.headers['x-nf-client-connection-ip'] || 'nomaʼlum';
-    const rawAgent = event.headers['user-agent'] || '';
-
-    // Qurilma tahlili
-    let deviceInfo = rawAgent.includes("Android") ? "Android" : rawAgent.includes("iPhone") ? "iPhone" : "PC";
-    let browser = rawAgent.includes("Chrome") ? "Chrome" : rawAgent.includes("Firefox") ? "Firefox" : "Safari";
-    const finalDevice = `${deviceInfo} (${browser})`;
-
-    const { YT_API_KEY, SUPABASE_URL, SUPABASE_KEY } = process.env;
+    // Faqat POST so'rovini qabul qilish
+    if (event.httpMethod !== "POST") {
+        return { statusCode: 405, body: "Method Not Allowed" };
+    }
 
     try {
-        // 1. Kanalni topish
-        const searchRes = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(username)}&key=${YT_API_KEY}&maxResults=1`);
-        if (!searchRes.data.items.length) throw new Error("Kanal topilmadi");
+        const { username } = JSON.parse(event.body);
+        const { YT_API_KEY, SUPABASE_URL, SUPABASE_KEY } = process.env;
+
+        // 1. YouTube API orqali kanalni qidirish
+        const searchRes = await axios.get(`https://www.googleapis.com/youtube/v3/search`, {
+            params: {
+                part: 'snippet',
+                type: 'channel',
+                q: username,
+                key: YT_API_KEY,
+                maxResults: 1
+            }
+        });
+
+        if (!searchRes.data.items || searchRes.data.items.length === 0) {
+            return { statusCode: 404, body: JSON.stringify({ error: "Kanal topilmadi" }) };
+        }
+
         const channelId = searchRes.data.items[0].id.channelId;
 
-        // 2. Mukammal statistika va Mavzular
-        const statsRes = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet,topicDetails&id=${channelId}&key=${YT_API_KEY}`);
-        const channel = statsRes.data.items[0];
+        // 2. Kanal statistikasi va Mashhur videolar (Parallel so'rov)
+        const [statsRes, popularRes] = await Promise.all([
+            axios.get(`https://www.googleapis.com/youtube/v3/channels`, {
+                params: { part: 'statistics,snippet,topicDetails', id: channelId, key: YT_API_KEY }
+            }),
+            axios.get(`https://www.googleapis.com/youtube/v3/search`, {
+                params: { part: 'snippet', channelId: channelId, maxResults: 5, order: 'viewCount', type: 'video', key: YT_API_KEY }
+            })
+        ]);
 
-        // 3. Eng mashhur 5 ta video
-        const popularRes = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=5&order=viewCount&type=video&key=${YT_API_KEY}`);
-        
-        // 4. Joylashuvni aniqlash
-        let loc = "Aniqlanmadi";
+        // 3. Supabase-ga Log yozish (Xato bo'lsa ham asosiy natija ketaveradi)
         try {
-            const geo = await axios.get(`https://ipapi.co/${userIP}/json/`);
-            if(geo.data && !geo.data.error) loc = `${geo.data.country_name}, ${geo.data.city} (${geo.data.org})`;
-        } catch(e){}
-
-        // 5. Supabase-ga log yozish
-        await axios.post(`${SUPABASE_URL}/rest/v1/logs`, {
-            channel_username: username,
-            ip_address: userIP,
-            device_info: finalDevice,
-            location: loc
-        }, {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
-        });
+            await axios.post(`${SUPABASE_URL}/rest/v1/logs`, {
+                channel_username: username,
+                ip_address: event.headers['x-nf-client-connection-ip'] || 'nomaʼlum'
+            }, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
+            });
+        } catch (e) { console.error("Supabase Error"); }
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ channel: channel, popularVideos: popularRes.data.items })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                channel: statsRes.data.items[0],
+                popularVideos: popularRes.data.items
+            })
         };
+
     } catch (error) {
-        return { statusCode: 400, body: JSON.stringify({ error: error.message }) };
+        console.error("General Error:", error.message);
+        return { 
+            statusCode: 500, 
+            body: JSON.stringify({ error: error.message }) 
+        };
     }
 };
