@@ -19,7 +19,7 @@ exports.handler = async (event) => {
 
         const isAdmin = password === "YtAdmins";
 
-        // --- ADMIN AMALLARI ---
+        // --- ADMIN FUNKSIYALARI ---
         if (isAdmin) {
             if (action === 'get_logs') {
                 const res = await axios.get(`${SUPABASE_URL}/rest/v1/logs?select=*&order=created_at.desc&limit=50`, {
@@ -27,14 +27,6 @@ exports.handler = async (event) => {
                 });
                 return { statusCode: 200, headers, body: JSON.stringify(res.data) };
             }
-
-            if (action === 'add_badword') {
-                await axios.post(`${SUPABASE_URL}/rest/v1/custom_badwords`, { word }, {
-                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-                });
-                return { statusCode: 200, headers, body: JSON.stringify({ m: "O'shildi" }) };
-            }
-
             if (action === 'toggle_block') {
                 const check = await axios.get(`${SUPABASE_URL}/rest/v1/blocked_users?ip_address=eq.${ip_address}`, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
@@ -50,22 +42,24 @@ exports.handler = async (event) => {
                 }
                 return { statusCode: 200, headers, body: JSON.stringify({ m: "OK" }) };
             }
-
             if (action === 'whitelist_ip') {
-                await axios.post(`${SUPABASE_URL}/rest/v1/whitelisted_users`, { ip_address }, {
+                await axios.post(`${SUPABASE_URL}/rest/v1/whitelisted_users`, { ip_address: ip_address }, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
                 return { statusCode: 200, headers, body: JSON.stringify({ m: "Oqlandi" }) };
             }
+            if (action === 'add_badword') {
+                await axios.post(`${SUPABASE_URL}/rest/v1/custom_badwords`, { word }, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                });
+                return { statusCode: 200, headers, body: JSON.stringify({ m: "OK" }) };
+            }
         }
 
         // --- FOYDALANUVCHI TEKSHIRUVI ---
-        // 1. IP Bloklanganmi?
         const blockCheck = await axios.get(`${SUPABASE_URL}/rest/v1/blocked_users?ip_address=eq.${userIP}`, {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
-        
-        // 2. IP Oqlanganmi (Whitelist)?
         const whiteCheck = await axios.get(`${SUPABASE_URL}/rest/v1/whitelisted_users?ip_address=eq.${userIP}`, {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
@@ -75,17 +69,30 @@ exports.handler = async (event) => {
             return { statusCode: 403, headers, body: JSON.stringify({ error: "BLOK" }) };
         }
 
-        // YouTube ma'lumotlari
-        const chanRes = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forHandle=${username}&key=${YT_API_KEY}`);
+        // --- YOUTUBE QIDIRUV (MUSTAHKAM) ---
+        let channel = null;
+        const cleanName = username.startsWith('@') ? username.substring(1) : username;
         
-        // Log yozish
-        await axios.post(`${SUPABASE_URL}/rest/v1/logs`, {
-            channel_username: username,
-            ip_address: userIP,
-            device_info: userAgent
-        }, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }});
+        // 1. Handle orqali qidirish
+        const res1 = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forHandle=${cleanName}&key=${YT_API_KEY}`);
+        
+        if (res1.data.items && res1.data.items.length > 0) {
+            channel = res1.data.items[0];
+        } else {
+            // 2. Qidiruv orqali ID topish
+            const res2 = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${username}&type=channel&maxResults=1&key=${YT_API_KEY}`);
+            if (res2.data.items && res2.data.items.length > 0) {
+                const cId = res2.data.items[0].snippet.channelId;
+                const res3 = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${cId}&key=${YT_API_KEY}`);
+                channel = res3.data.items[0];
+            }
+        }
 
-        const customWords = await axios.get(`${SUPABASE_URL}/rest/v1/custom_badwords?select=word`, {
+        // Log va badwords
+        await axios.post(`${SUPABASE_URL}/rest/v1/logs`, { channel_username: username, ip_address: userIP, device_info: userAgent }, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        const badRes = await axios.get(`${SUPABASE_URL}/rest/v1/custom_badwords?select=word`, {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
 
@@ -93,9 +100,9 @@ exports.handler = async (event) => {
             statusCode: 200,
             headers,
             body: JSON.stringify({ 
-                channel: chanRes.data.items ? chanRes.data.items[0] : null,
-                customBadwords: customWords.data.map(w => w.word),
-                isWhitelisted: isWhitelisted
+                channel, 
+                customBadwords: badRes.data.map(w => w.word),
+                isWhitelisted 
             })
         };
     } catch (e) {
