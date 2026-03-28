@@ -5,34 +5,46 @@ exports.handler = async (event) => {
 
     const { username } = JSON.parse(event.body);
     const userIP = event.headers['x-nf-client-connection-ip'] || 'nomaʼlum';
-    const userAgent = event.headers['user-agent'] || 'nomaʼlum qurilma'; // Qurilma va brauzer ma'lumoti
+    const rawAgent = event.headers['user-agent'] || '';
+
+    // Qurilmani aniqlash (Oddiyroq usulda)
+    let deviceInfo = "Kompyuter";
+    if (rawAgent.includes("Android")) deviceInfo = "Android Telefon";
+    else if (rawAgent.includes("iPhone")) deviceInfo = "iPhone";
+    else if (rawAgent.includes("iPad")) deviceInfo = "iPad";
+    
+    // Brauzerni aniqlash
+    let browser = "Noma'lum brauzer";
+    if (rawAgent.includes("Chrome")) browser = "Chrome";
+    else if (rawAgent.includes("Firefox")) browser = "Firefox";
+    else if (rawAgent.includes("Safari") && !rawAgent.includes("Chrome")) browser = "Safari";
+
+    const finalDeviceInfo = `${deviceInfo} (${browser})`;
 
     const { YT_API_KEY, SUPABASE_URL, SUPABASE_KEY } = process.env;
 
     try {
-        // 1. IP orqali joylashuvni aniqlash (bepul API)
+        // Joylashuvni aniqroq servis orqali tekshirish
         let locationData = "Aniqlanmadi";
         try {
-            const geoRes = await axios.get(`http://ip-api.com/json/${userIP}`);
-            if (geoRes.data.status === 'success') {
-                locationData = `${geoRes.data.country}, ${geoRes.data.city} (Provayder: ${geoRes.data.isp})`;
+            const geoRes = await axios.get(`https://ipapi.co/${userIP}/json/`);
+            if (geoRes.data && !geoRes.data.error) {
+                locationData = `${geoRes.data.country_name}, ${geoRes.data.city} (Pochta indeksi: ${geoRes.data.postal}, Provayder: ${geoRes.data.org})`;
             }
-        } catch (e) { console.log("Geo xato"); }
-
-        // 2. YouTube ma'lumotlarini olish (Search qismi)
-        const searchRes = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(username)}&key=${YT_API_KEY}&maxResults=1`);
-        
-        if (!searchRes.data.items || searchRes.data.items.length === 0) {
-            throw new Error("Kanal topilmadi");
+        } catch (e) { 
+            // Agar ipapi xato bersa, zaxira sifatida eski usul
+            locationData = "Joylashuv xizmati band";
         }
+
+        const searchRes = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(username)}&key=${YT_API_KEY}&maxResults=1`);
         const channelId = searchRes.data.items[0].id.channelId;
         const statsRes = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelId}&key=${YT_API_KEY}`);
 
-        // 3. Supabase-ga batafsil Log yozish
+        // Supabase-ga yozish
         await axios.post(`${SUPABASE_URL}/rest/v1/logs`, {
             channel_username: username,
             ip_address: userIP,
-            device_info: userAgent,
+            device_info: finalDeviceInfo, // Endi: "Android Telefon (Chrome)" ko'rinishida bo'ladi
             location: locationData
         }, {
             headers: {
