@@ -3,76 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT Analyst PRO</title>
+    <title>YT Analyst PRO | Intelligence Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #050507; color: white; font-family: system-ui, sans-serif; min-height: 100vh; }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .danger-glow { border-color: #ef4444 !important; box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
-        #result.hidden { display: none; }
-        #loading.hidden { display: none; }
+        body { background: #050507; color: white; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .stat-card { transition: all 0.3s ease; border-left: 2px solid transparent; }
+        .stat-card:hover { background: rgba(255, 255, 255, 0.05); border-left: 2px solid #ef4444; transform: translateX(5px); }
+        .danger-glow { border-color: #ef4444 !important; box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+        .hidden { display: none !important; }
+        
+        /* Loading Animatsiyasi */
+        .loader {
+            width: 48px; height: 48px; border: 3px solid #FFF; border-bottom-color: #ef4444;
+            border-radius: 50%; display: inline-block; box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
     </style>
 </head>
-<body class="p-6 md:p-12">
+<body class="p-4 md:p-12">
 
-    <div class="max-w-2xl mx-auto mt-10">
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-black italic uppercase tracking-tighter">YT<span class="text-red-600">PRO</span></h1>
-            <p class="text-gray-500 text-[10px] tracking-[0.3em] font-bold mt-2 uppercase">Global Analytics</p>
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-16">
+            <h1 class="text-6xl font-black italic uppercase tracking-tighter mix-blend-difference">
+                YT<span class="text-red-600">PRO</span>
+            </h1>
+            <div class="flex items-center justify-center gap-2 mt-2">
+                <span class="h-[1px] w-8 bg-red-600"></span>
+                <p class="text-gray-500 text-[9px] tracking-[0.5em] font-bold uppercase">Advanced Neural Analytics</p>
+                <span class="h-[1px] w-8 bg-red-600"></span>
+            </div>
         </header>
         
-        <div id="searchBox" class="glass p-2 rounded-[2rem] flex flex-col md:flex-row gap-2 transition-all">
+        <div id="searchBox" class="glass p-3 rounded-[2.5rem] flex flex-col md:flex-row gap-2 transition-all duration-500 mb-12">
             <input type="text" id="channelInput" placeholder="Kanal nomi yoki @handle..." 
-                class="flex-grow bg-transparent p-4 outline-none text-white text-lg ml-2">
+                class="flex-grow bg-transparent p-5 outline-none text-white text-xl font-light placeholder:text-gray-700">
             <button onclick="getStatistics()" id="searchBtn" 
-                class="bg-red-600 hover:bg-red-700 px-10 py-4 rounded-[1.5rem] font-bold uppercase transition active:scale-95">
-                TAHLIL
+                class="bg-red-600 hover:bg-red-700 px-12 py-5 rounded-[2rem] font-black uppercase tracking-widest transition active:scale-95 shadow-xl shadow-red-900/20">
+                ANALYSIS
             </button>
         </div>
 
-        <div id="loading" class="hidden mt-10 text-center animate-pulse text-gray-500 font-mono text-xs">
-            YouTube serverlaridan ma'lumot olinmoqda...
+        <div id="loading" class="hidden flex flex-col items-center py-20">
+            <span class="loader mb-4"></span>
+            <p class="text-gray-600 font-mono text-[10px] uppercase tracking-widest">Sinxronizatsiya qilinmoqda...</p>
         </div>
 
-        <div id="result" class="hidden mt-12 glass p-10 rounded-[2.5rem] animate-in fade-in duration-500">
-            <div class="flex flex-col items-center gap-6">
-                <img id="avatar" class="w-32 h-32 rounded-[2rem] border-4 border-red-600/20 object-cover shadow-2xl">
-                <div class="text-center">
-                    <h2 id="name" class="text-3xl font-black"></h2>
-                    <p id="handle" class="text-red-500 font-mono text-sm mt-1"></p>
-                    <div id="stats" class="mt-6 flex gap-4 justify-center text-[10px] font-bold uppercase tracking-widest text-gray-400">
+        <div id="result" class="hidden space-y-8 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+            
+            <div class="glass p-8 md:p-12 rounded-[3.5rem] flex flex-col md:flex-row items-center gap-10">
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-red-600 to-purple-600 rounded-[3rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                    <img id="avatar" class="relative w-44 h-44 rounded-[2.8rem] object-cover border border-white/10 shadow-2xl">
+                </div>
+                
+                <div class="flex-grow text-center md:text-left">
+                    <h2 id="name" class="text-5xl font-black tracking-tight leading-none mb-2"></h2>
+                    <p id="handle" class="text-red-600 font-mono text-lg mb-6 opacity-80"></p>
+                    
+                    <div id="mainStatsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         </div>
                 </div>
             </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass p-8 rounded-[2.5rem]">
+                    <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6">Algorithm Insights</h3>
+                    <div id="insightsList" class="space-y-4">
+                        </div>
+                </div>
+
+                <div class="glass p-8 rounded-[2.5rem] border border-red-900/10">
+                    <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6">Channel Growth Rank</h3>
+                    <div class="flex items-center justify-between">
+                        <div id="rankBadge" class="text-7xl font-black italic text-red-600 drop-shadow-2xl italic tracking-tighter"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] text-gray-500 uppercase">Status</p>
+                            <p id="statusText" class="font-bold text-lg text-white"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div style="position: fixed; bottom: 15px; right: 15px; opacity: 0.15; font-size: 9px; cursor: pointer; color: #444; font-family: monospace;" 
-         onclick="window.location.href='admin.html'">
-        v1.1.2-stable
+    <div style="position: fixed; bottom: 20px; right: 20px; opacity: 0.1; cursor: pointer; font-size: 8px; font-family: monospace;" 
+         onclick="window.location.href='admin.html'" class="hover:opacity-100 transition-opacity">
+        SYS_VER_1.1.2_STABLE
     </div>
 
     <script>
         async function getStatistics() {
-            const inputField = document.getElementById('channelInput');
-            const searchBtn = document.getElementById('searchBtn');
-            const searchBox = document.getElementById('searchBox');
-            const input = inputField.value.trim();
-
+            const input = document.getElementById('channelInput').value.trim();
             if (!input) return;
 
-            // 1. Local Block tekshiruvi
+            // Local Block Check
             const blockUntil = localStorage.getItem('blockUntil');
             if (blockUntil && new Date().getTime() < blockUntil) {
-                const diff = Math.ceil((blockUntil - new Date().getTime()) / 60000);
-                alert(`Xavfsizlik tizimi: Siz ${diff} daqiqaga bloklangansiz!`);
+                alert("Xavfsizlik tizimi: Siz vaqtincha bloklangansiz!");
                 return;
             }
 
-            // UI-ni tozalash
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('result').classList.add('hidden');
-            searchBox.classList.remove('danger-glow');
 
             try {
                 const res = await fetch('/.netlify/functions/get-yt-data', {
@@ -82,61 +117,101 @@
                 });
                 
                 if (res.status === 403) {
-                    alert("⚠️ IP manzilingiz server tomonidan bloklangan!");
+                    alert("⚠️ IP manzilingiz server tomonidan butunlay bloklangan!");
                     return;
                 }
 
                 const data = await res.json();
 
-                // 2. Admin oqlagan bo'lsa bloklarni yechish
-                if (data.isWhitelisted) {
-                    localStorage.removeItem('blockUntil');
-                    localStorage.removeItem('userStrikes');
-                }
-
-                // 3. Badword (Taqiqlangan so'zlar) filtri
-                if (data.badwords && data.badwords.some(word => input.toLowerCase().includes(word.toLowerCase()))) {
-                    let strikes = parseInt(localStorage.getItem('userStrikes') || '0') + 1;
-                    localStorage.setItem('userStrikes', strikes);
-                    
-                    if (strikes >= 3) {
-                        const lockTime = new Date().getTime() + 1200000; // 20 min
-                        localStorage.setItem('blockUntil', lockTime);
-                        searchBox.classList.add('danger-glow');
-                        alert("🚨 QOIDABUZARLIK! Ketma-ket 3 ta taqiqlangan so'z. 20 daqiqaga bloklandingiz!");
-                    } else {
-                        alert(`⚠️ Ogohlantirish: So'rovda taqiqlangan so'z mavjud! Strike: ${strikes}/3`);
-                    }
+                // Badword Check
+                if (data.badwords && data.badwords.some(w => input.toLowerCase().includes(w.toLowerCase()))) {
+                    handleStrike();
                     return;
                 }
 
-                // 4. Natijani chiqarish
                 if (data.channel) {
-                    const c = data.channel;
-                    document.getElementById('result').classList.remove('hidden');
-                    document.getElementById('name').innerText = c.snippet.title;
-                    document.getElementById('handle').innerText = c.snippet.customUrl || "@" + input;
-                    document.getElementById('avatar').src = c.snippet.thumbnails.high.url;
-                    
-                    const subCount = parseInt(c.statistics.subscriberCount).toLocaleString();
-                    const videoCount = parseInt(c.statistics.videoCount).toLocaleString();
-                    document.getElementById('stats').innerText = `${subCount} SUBS • ${videoCount} VIDEOS`;
+                    renderUI(data.channel);
                 } else {
-                    alert("Kanal topilmadi! @handle yoki nomni to'g'ri yozing.");
+                    alert("Kanal topilmadi!");
                 }
-
             } catch (e) {
-                console.error(e);
-                alert("Server bilan ulanishda xatolik yuz berdi.");
+                alert("Server xatosi!");
             } finally {
                 document.getElementById('loading').classList.add('hidden');
             }
         }
 
-        // Enter tugmasini bosganda qidirish
-        document.getElementById('channelInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') getStatistics();
-        });
+        function renderUI(c) {
+            const res = document.getElementById('result');
+            res.classList.remove('hidden');
+
+            document.getElementById('name').innerText = c.snippet.title;
+            document.getElementById('handle').innerText = c.snippet.customUrl || "@" + input;
+            document.getElementById('avatar').src = c.snippet.thumbnails.high.url;
+
+            const subs = parseInt(c.statistics.subscriberCount);
+            const views = parseInt(c.statistics.viewCount);
+            const videos = parseInt(c.statistics.videoCount);
+            
+            // Asosiy Grid
+            document.getElementById('mainStatsGrid').innerHTML = `
+                <div class="stat-card p-3 rounded-xl bg-white/5">
+                    <p class="text-[8px] text-gray-500 uppercase">Obunachilar</p>
+                    <p class="text-lg font-black">${subs.toLocaleString()}</p>
+                </div>
+                <div class="stat-card p-3 rounded-xl bg-white/5">
+                    <p class="text-[8px] text-gray-500 uppercase">Ko'rishlar</p>
+                    <p class="text-lg font-black">${(views/1000000).toFixed(1)}M</p>
+                </div>
+                <div class="stat-card p-3 rounded-xl bg-white/5">
+                    <p class="text-[8px] text-gray-500 uppercase">Videolar</p>
+                    <p class="text-lg font-black">${videos}</p>
+                </div>
+                <div class="stat-card p-3 rounded-xl bg-white/5">
+                    <p class="text-[8px] text-gray-500 uppercase">Daromad*</p>
+                    <p class="text-lg font-black text-green-500">$${(views/50000).toFixed(0)}k+</p>
+                </div>
+            `;
+
+            // Deep Insights
+            const age = Math.floor((new Date() - new Date(c.snippet.publishedAt)) / (1000 * 60 * 60 * 24));
+            const engagement = ((views / subs) / videos * 100).toFixed(2);
+
+            document.getElementById('insightsList').innerHTML = `
+                <div class="flex justify-between text-xs border-b border-white/5 pb-2">
+                    <span class="text-gray-500 uppercase">Kanal yoshi</span>
+                    <span class="font-bold">${age} kun</span>
+                </div>
+                <div class="flex justify-between text-xs border-b border-white/5 pb-2">
+                    <span class="text-gray-500 uppercase">Foydali ish koeffitsienti</span>
+                    <span class="font-bold text-red-500">${engagement}%</span>
+                </div>
+                <div class="flex justify-between text-xs border-b border-white/5 pb-2">
+                    <span class="text-gray-500 uppercase">Auditoriya Sifati</span>
+                    <span class="font-bold text-green-500">${subs > 1000000 ? 'Viral' : 'Stable'}</span>
+                </div>
+            `;
+
+            // Rank Badge
+            const rank = subs > 1000000 ? 'S+' : (subs > 100000 ? 'A' : 'B');
+            document.getElementById('rankBadge').innerText = rank;
+            document.getElementById('statusText').innerText = subs > 1000000 ? "TIER 1 ELITE" : "RISING STAR";
+        }
+
+        function handleStrike() {
+            let s = parseInt(localStorage.getItem('userStrikes') || '0') + 1;
+            localStorage.setItem('userStrikes', s);
+            if(s >= 3) {
+                localStorage.setItem('blockUntil', new Date().getTime() + 1200000);
+                alert("🚨 TIZIM QULFLANDI (3/3)!");
+            } else {
+                alert(`⚠️ Ogohlantirish! (${s}/3)`);
+            }
+            location.reload();
+        }
+
+        // Enter orqali qidirish
+        document.getElementById('channelInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') getStatistics(); });
     </script>
 </body>
 </html>
