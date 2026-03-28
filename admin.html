@@ -2,28 +2,39 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>YT-PRO | ADMIN</title>
+    <title>YT-PRO | SECURITY ROOT</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; font-family: 'Courier New', monospace; color: #0f0; }
+        .hidden { display: none !important; }
+        .glitch-border { border: 1px solid #0f0; box-shadow: 0 0 10px #0f0; }
+    </style>
 </head>
-<body class="bg-black text-white p-10 font-mono">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-10 border-b border-white/10 pb-5">
-            <h1 class="text-2xl font-black text-red-600 uppercase">System Root</h1>
-            <button onclick="location.href='index.html'" class="text-xs text-gray-500 hover:text-white">SAYTGA QAYTISH</button>
-        </div>
+<body class="p-10">
+    <div id="authScreen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[200]">
+        <h2 class="text-xl mb-6 animate-pulse">SYSTEM ACCESS REQUIRED</h2>
+        <input type="password" id="rootPass" class="bg-transparent border-b-2 border-green-500 outline-none text-center text-2xl tracking-[1em] w-64 mb-6">
+        <button onclick="checkAuth()" class="border border-green-500 px-10 py-2 hover:bg-green-500 hover:text-black transition">ENTER</button>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
-                <h2 class="text-xs font-bold text-gray-500 uppercase mb-4 tracking-widest">Oxirgi loglar</h2>
-                <div id="logs" class="space-y-2 h-96 overflow-y-auto pr-2 text-[10px]"></div>
-                <button onclick="loadLogs()" class="w-full mt-4 bg-red-600 py-2 rounded-lg font-bold text-xs">YANGILASH</button>
+    <div id="adminContent" class="max-w-6xl mx-auto hidden">
+        <header class="flex justify-between border-b border-green-900 pb-5 mb-10">
+            <h1 class="text-2xl font-black italic">PRO_ROOT_v1.1</h1>
+            <button onclick="location.href='index.html'" class="text-[10px] border border-green-900 px-3">EXIT_TO_MAIN</button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-2 glitch-border p-6 rounded-lg bg-black">
+                <h3 class="text-xs uppercase mb-4 text-green-700">Live Traffic Logs</h3>
+                <div id="logs" class="space-y-2 h-[500px] overflow-y-auto text-[11px]"></div>
+                <button onclick="loadLogs()" class="w-full mt-4 border border-green-500 py-2 text-xs">RELOAD_DATABASE</button>
             </div>
-
+            
             <div class="space-y-6">
-                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
-                    <h2 class="text-xs font-bold text-gray-500 uppercase mb-4 tracking-widest">Taqiqlangan so'z</h2>
-                    <input type="text" id="badword" class="w-full bg-black border border-white/10 p-3 rounded-xl mb-3 outline-none focus:border-red-600 text-sm" placeholder="So'zni kiriting...">
-                    <button onclick="addWord()" class="w-full bg-white text-black py-3 rounded-xl font-bold text-xs uppercase">Filtrga qo'shish</button>
+                <div class="glitch-border p-6 rounded-lg bg-black">
+                    <h3 class="text-xs uppercase mb-4 text-green-700">Add Content Filter</h3>
+                    <input type="text" id="badword" class="w-full bg-black border border-green-900 p-2 text-sm mb-3 outline-none focus:border-green-500" placeholder="New keyword...">
+                    <button onclick="addWord()" class="w-full bg-green-900 text-black py-2 font-bold text-xs">INJECT_FILTER</button>
                 </div>
             </div>
         </div>
@@ -31,15 +42,23 @@
 
     <script>
         const API = "/.netlify/functions/get-yt-data";
-        const PASS = "YtAdmins";
+        const PASS = "YtAdmins"; // Sizning parolingiz
+
+        function checkAuth() {
+            if(document.getElementById('rootPass').value === PASS) {
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('adminContent').classList.remove('hidden');
+                loadLogs();
+            } else { alert("ACCESS DENIED"); }
+        }
 
         async function loadLogs() {
             const res = await fetch(API, { method:'POST', body: JSON.stringify({ action:'get_logs', password:PASS })});
             const data = await res.json();
             document.getElementById('logs').innerHTML = data.map(l => `
-                <div class="bg-white/5 p-3 rounded-lg border border-white/5 flex justify-between items-center">
-                    <span>${l.channel_username} <br><i class="opacity-30 text-[8px]">${l.ip_address}</i></span>
-                    <button onclick="blockIP('${l.ip_address}')" class="text-red-500 hover:scale-110 transition">BLOK</button>
+                <div class="border-b border-green-900/30 py-2 flex justify-between items-center">
+                    <span>> ${l.channel_username} <span class="opacity-30">[${l.ip_address}]</span></span>
+                    <button onclick="blockIP('${l.ip_address}')" class="text-red-600 hover:bg-red-600 hover:text-white px-2">BLOCK</button>
                 </div>
             `).join('');
         }
@@ -47,16 +66,15 @@
         async function addWord() {
             const word = document.getElementById('badword').value;
             await fetch(API, { method:'POST', body: JSON.stringify({ action:'add_badword', password:PASS, word: word })});
-            alert("Bajarildi!");
+            alert("KEYWORD INJECTED");
             document.getElementById('badword').value = "";
         }
 
         async function blockIP(ip) {
             await fetch(API, { method:'POST', body: JSON.stringify({ action:'toggle_block', password:PASS, ip_address: ip })});
-            alert("Bloklandi!");
+            alert("IP_NULLIFIED");
+            loadLogs();
         }
-
-        loadLogs();
     </script>
 </body>
 </html>
