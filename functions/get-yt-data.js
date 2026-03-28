@@ -16,7 +16,7 @@ exports.handler = async (event) => {
         const userIP = event.headers['x-nf-client-connection-ip'] || 'unknown';
         const supabaseAuth = { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } };
 
-        // --- ADMIN PROTOKOLLARI ---
+        // --- OWNER (ADMIN) AMALLARI ---
         if (body.password === "YtAdmins") {
             if (body.action === 'get_logs') {
                 const res = await axios.get(`${SUPABASE_URL}/rest/v1/logs?select=*&order=created_at.desc&limit=50`, supabaseAuth);
@@ -36,11 +36,11 @@ exports.handler = async (event) => {
             }
         }
 
-        // --- XAVFSIZLIK TEKSHIRUVI ---
+        // --- XAVFSIZLIK: IP BLOCK TEKSHIRUVI ---
         const blockCheck = await axios.get(`${SUPABASE_URL}/rest/v1/blocked_users?ip_address=eq.${userIP}`, supabaseAuth);
         if (blockCheck.data.length > 0) return { statusCode: 403, headers, body: JSON.stringify({ error: "BLOCKED" }) };
 
-        // --- YOUTUBE DEEP ANALYTICS ---
+        // --- YOUTUBE ANALIZ (MURAKKAB ALGORITM) ---
         const username = (body.username || "").replace('@', '');
         const chRes = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&forHandle=${encodeURIComponent(username)}&key=${YT_API_KEY}`);
         
@@ -49,19 +49,23 @@ exports.handler = async (event) => {
         const channel = chRes.data.items[0];
         const playlistId = channel.contentDetails.relatedPlaylists.uploads;
 
-        // Oxirgi 15 ta video tahlili
-        const vidsRes = await axios.get(`https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=15&playlistId=${playlistId}&key=${YT_API_KEY}`);
+        // Eng so'nggi 20 ta video ma'lumotlari
+        const vidsRes = await axios.get(`https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails,snippet&maxResults=20&playlistId=${playlistId}&key=${YT_API_KEY}`);
         const vIds = vidsRes.data.items.map(v => v.contentDetails.videoId).join(',');
-        const vStats = await axios.get(`https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${vIds}&key=${YT_API_KEY}`);
+        const vStats = await axios.get(`https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet,contentDetails&id=${vIds}&key=${YT_API_KEY}`);
 
-        // Log yozish va Badwordlarni olish
-        await axios.post(`${SUPABASE_URL}/rest/v1/logs`, { channel_username: body.username, ip_address: userIP }, supabaseAuth);
+        // Badwordlarni olish va Log yozish
         const bwRes = await axios.get(`${SUPABASE_URL}/rest/v1/custom_badwords?select=word`, supabaseAuth);
+        await axios.post(`${SUPABASE_URL}/rest/v1/logs`, { channel_username: body.username, ip_address: userIP }, supabaseAuth);
 
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({ channel, recentVideos: vStats.data.items, badwords: bwRes.data.map(w => w.word) })
+            body: JSON.stringify({ 
+                channel, 
+                recentVideos: vStats.data.items, 
+                badwords: bwRes.data.map(w => w.word) 
+            })
         };
     } catch (e) {
         return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
