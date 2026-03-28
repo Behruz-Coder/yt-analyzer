@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>YT-PRO | ADMIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white p-10 font-mono">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-10 border-b border-white/10 pb-5">
+            <h1 class="text-2xl font-black text-red-600 uppercase">System Root</h1>
+            <button onclick="location.href='index.html'" class="text-xs text-gray-500 hover:text-white">SAYTGA QAYTISH</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                <h2 class="text-xs font-bold text-gray-500 uppercase mb-4 tracking-widest">Oxirgi loglar</h2>
+                <div id="logs" class="space-y-2 h-96 overflow-y-auto pr-2 text-[10px]"></div>
+                <button onclick="loadLogs()" class="w-full mt-4 bg-red-600 py-2 rounded-lg font-bold text-xs">YANGILASH</button>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                    <h2 class="text-xs font-bold text-gray-500 uppercase mb-4 tracking-widest">Taqiqlangan so'z</h2>
+                    <input type="text" id="badword" class="w-full bg-black border border-white/10 p-3 rounded-xl mb-3 outline-none focus:border-red-600 text-sm" placeholder="So'zni kiriting...">
+                    <button onclick="addWord()" class="w-full bg-white text-black py-3 rounded-xl font-bold text-xs uppercase">Filtrga qo'shish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = "/.netlify/functions/get-yt-data";
+        const PASS = "YtAdmins";
+
+        async function loadLogs() {
+            const res = await fetch(API, { method:'POST', body: JSON.stringify({ action:'get_logs', password:PASS })});
+            const data = await res.json();
+            document.getElementById('logs').innerHTML = data.map(l => `
+                <div class="bg-white/5 p-3 rounded-lg border border-white/5 flex justify-between items-center">
+                    <span>${l.channel_username} <br><i class="opacity-30 text-[8px]">${l.ip_address}</i></span>
+                    <button onclick="blockIP('${l.ip_address}')" class="text-red-500 hover:scale-110 transition">BLOK</button>
+                </div>
+            `).join('');
+        }
+
+        async function addWord() {
+            const word = document.getElementById('badword').value;
+            await fetch(API, { method:'POST', body: JSON.stringify({ action:'add_badword', password:PASS, word: word })});
+            alert("Bajarildi!");
+            document.getElementById('badword').value = "";
+        }
+
+        async function blockIP(ip) {
+            await fetch(API, { method:'POST', body: JSON.stringify({ action:'toggle_block', password:PASS, ip_address: ip })});
+            alert("Bloklandi!");
+        }
+
+        loadLogs();
+    </script>
+</body>
+</html>
