@@ -17,10 +17,8 @@ exports.handler = async (event) => {
         const userIP = event.headers['x-nf-client-connection-ip'] || 'unknown';
         const userAgent = event.headers['user-agent'] || 'unknown';
 
-        const isAdmin = password === "YtAdmins";
-
-        // --- ADMIN FUNKSIYALARI ---
-        if (isAdmin) {
+        // --- ADMIN MODULI ---
+        if (password === "YtAdmins") {
             if (action === 'get_logs') {
                 const res = await axios.get(`${SUPABASE_URL}/rest/v1/logs?select=*&order=created_at.desc&limit=50`, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
@@ -43,7 +41,7 @@ exports.handler = async (event) => {
                 return { statusCode: 200, headers, body: JSON.stringify({ m: "OK" }) };
             }
             if (action === 'whitelist_ip') {
-                await axios.post(`${SUPABASE_URL}/rest/v1/whitelisted_users`, { ip_address: ip_address }, {
+                await axios.post(`${SUPABASE_URL}/rest/v1/whitelisted_users`, { ip_address }, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
                 return { statusCode: 200, headers, body: JSON.stringify({ m: "Oqlandi" }) };
@@ -56,7 +54,7 @@ exports.handler = async (event) => {
             }
         }
 
-        // --- FOYDALANUVCHI TEKSHIRUVI ---
+        // --- XAVFSIZLIK TEKSHIRUVI ---
         const blockCheck = await axios.get(`${SUPABASE_URL}/rest/v1/blocked_users?ip_address=eq.${userIP}`, {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
@@ -66,32 +64,40 @@ exports.handler = async (event) => {
         const isWhitelisted = whiteCheck.data.length > 0;
 
         if (blockCheck.data.length > 0 && !isWhitelisted) {
-            return { statusCode: 403, headers, body: JSON.stringify({ error: "BLOK" }) };
+            return { statusCode: 403, headers, body: JSON.stringify({ error: "Siz butunlay bloklangansiz!" }) };
         }
 
-        // --- YOUTUBE QIDIRUV (MUSTAHKAM) ---
+        // --- YOUTUBE QIDIRUV (DOUBLE-CHECK) ---
         let channel = null;
-        const cleanName = username.startsWith('@') ? username.substring(1) : username;
-        
-        // 1. Handle orqali qidirish
-        const res1 = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forHandle=${cleanName}&key=${YT_API_KEY}`);
-        
-        if (res1.data.items && res1.data.items.length > 0) {
-            channel = res1.data.items[0];
-        } else {
-            // 2. Qidiruv orqali ID topish
-            const res2 = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${username}&type=channel&maxResults=1&key=${YT_API_KEY}`);
-            if (res2.data.items && res2.data.items.length > 0) {
-                const cId = res2.data.items[0].snippet.channelId;
-                const res3 = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${cId}&key=${YT_API_KEY}`);
-                channel = res3.data.items[0];
+        if (username) {
+            const cleanName = username.startsWith('@') ? username.substring(1) : username;
+            try {
+                // 1-urinish: Handle orqali
+                const res1 = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forHandle=${encodeURIComponent(cleanName)}&key=${YT_API_KEY}`);
+                if (res1.data.items && res1.data.items.length > 0) {
+                    channel = res1.data.items[0];
+                } else {
+                    // 2-urinish: Search orqali
+                    const res2 = await axios.get(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(username)}&type=channel&maxResults=1&key=${YT_API_KEY}`);
+                    if (res2.data.items && res2.data.items.length > 0) {
+                        const cId = res2.data.items[0].snippet.channelId;
+                        const res3 = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${cId}&key=${YT_API_KEY}`);
+                        channel = res3.data.items[0];
+                    }
+                }
+            } catch (ytErr) {
+                console.error("YouTube API Error");
             }
+
+            // Log yozish
+            await axios.post(`${SUPABASE_URL}/rest/v1/logs`, {
+                channel_username: username,
+                ip_address: userIP,
+                device_info: userAgent
+            }, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }});
         }
 
-        // Log va badwords
-        await axios.post(`${SUPABASE_URL}/rest/v1/logs`, { channel_username: username, ip_address: userIP, device_info: userAgent }, {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-        });
+        // Badwords ro'yxati
         const badRes = await axios.get(`${SUPABASE_URL}/rest/v1/custom_badwords?select=word`, {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
