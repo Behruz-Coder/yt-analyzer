@@ -3,22 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT ANALYST PRO | Deep Intelligence v1.2</title>
+    <title>YT ANALYST PRO | Deep Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { background: #050507; color: white; font-family: 'Inter', sans-serif; min-height: 100vh; }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 2rem; }
-        .stat-card { background: rgba(255, 255, 255, 0.03); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .stat-card:hover { background: rgba(255, 255, 255, 0.07); transform: translateY(-5px); border-color: rgba(239, 68, 68, 0.4); }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 2rem; }
+        .stat-card { background: rgba(255, 255, 255, 0.03); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; }
+        .stat-card:hover { background: rgba(255, 255, 255, 0.06); transform: translateY(-3px); border-color: #ef4444; }
         .hidden { display: none !important; }
-        
-        /* Neon effektlar */
-        .neon-text-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
-        .neon-text-green { text-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
-        
         .loader {
-            width: 40px; height: 40px; border: 4px solid #111; border-bottom-color: #ef4444;
+            width: 32px; height: 32px; border: 3px solid #111; border-bottom-color: #ef4444;
             border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite;
         }
         @keyframes rotation { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
@@ -26,80 +21,66 @@
 </head>
 <body class="p-4 md:p-10">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="text-center mb-16">
-            <h1 class="text-6xl font-black italic tracking-tighter uppercase neon-text-red">YT<span class="text-red-600">PRO</span></h1>
-            <p class="text-gray-500 text-[10px] tracking-[0.6em] font-bold mt-3 uppercase">Advanced Intelligence & Neural Analytics</p>
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-black italic tracking-tighter uppercase">YT<span class="text-red-600">PRO</span></h1>
+            <p class="text-gray-500 text-[9px] tracking-[0.4em] font-bold mt-2 uppercase">Advanced Data Intelligence</p>
         </header>
         
-        <div id="searchBox" class="glass p-3 flex flex-col md:flex-row gap-3 transition-all duration-500 mb-16 shadow-2xl">
+        <div id="searchBox" class="glass p-2 flex flex-col md:flex-row gap-2 transition-all duration-500 mb-16">
             <input type="text" id="channelInput" placeholder="Kanal @handle yoki nomini kiriting..." 
-                class="flex-grow bg-transparent p-6 outline-none text-white text-xl font-light rounded-2xl">
+                class="flex-grow bg-transparent p-5 outline-none text-white text-lg font-light rounded-2xl">
             <button onclick="getStatistics()" id="searchBtn" 
-                class="bg-red-600 hover:bg-red-700 px-16 py-6 rounded-2xl font-black uppercase tracking-widest transition active:scale-95 shadow-lg shadow-red-900/20">
-                Deep Analysis
+                class="bg-red-600 hover:bg-red-700 px-12 py-5 rounded-[1.5rem] font-black uppercase tracking-widest transition active:scale-95">
+                ANALIZ
             </button>
         </div>
 
-        <div id="loading" class="hidden flex flex-col items-center py-20">
-            <span class="loader mb-4"></span>
-            <p class="text-gray-600 animate-pulse uppercase text-[10px] tracking-widest">Algoritmlar hisoblanmoqda...</p>
+        <div id="loading" class="hidden flex justify-center py-10">
+            <span class="loader"></span>
         </div>
 
-        <div id="result" class="hidden space-y-10 animate-in fade-in duration-1000">
+        <div id="result" class="hidden space-y-8 animate-in fade-in duration-700">
             
-            <div class="glass p-8 md:p-12 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-                    <svg width="200" height="200" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                </div>
-                <img id="avatar" class="w-48 h-48 rounded-[3rem] object-cover border-8 border-white/5 shadow-2xl z-10">
-                <div class="flex-grow text-center md:text-left z-10">
-                    <h2 id="name" class="text-5xl font-black tracking-tight mb-2"></h2>
-                    <p id="handle" class="text-red-600 font-mono text-xl mb-8 opacity-80"></p>
+            <div class="glass p-8 md:p-10 flex flex-col md:flex-row items-center gap-10">
+                <img id="avatar" class="w-40 h-40 rounded-[2.5rem] object-cover border-4 border-white/5 shadow-2xl">
+                <div class="flex-grow text-center md:text-left">
+                    <h2 id="name" class="text-4xl font-black mb-1"></h2>
+                    <p id="handle" class="text-red-600 font-mono text-sm mb-6 opacity-70"></p>
                     
-                    <div id="mainStatsGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div id="mainStatsGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <div class="lg:col-span-2 glass p-10 space-y-8">
-                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-[0.4em] mb-4 border-b border-white/5 pb-4">Algorithm Secret Metrics</h3>
-                    <div id="detailedStats" class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2 glass p-8 space-y-6">
+                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest">Deep Channel Metrics</h3>
+                    <div id="detailedStats" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         </div>
                 </div>
 
-                <div class="glass p-10 flex flex-col justify-center items-center text-center relative overflow-hidden bg-gradient-to-b from-red-600/5 to-transparent">
-                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-[0.4em] mb-10">Evolution Rank</h3>
-                    <div id="rankBadge" class="text-[10rem] font-black italic text-red-600 leading-none neon-text-red mb-4"></div>
-                    <p id="statusText" class="text-lg font-black tracking-[0.2em] uppercase text-white"></p>
-                    <p class="text-[10px] text-gray-500 mt-2 italic">Hisoblangan global daraja</p>
+                <div class="glass p-8 flex flex-col justify-center items-center text-center border border-red-900/10">
+                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-6">Algorithm Rank</h3>
+                    <div id="rankBadge" class="text-8xl font-black italic text-red-600 mb-2"></div>
+                    <p id="statusText" class="text-sm font-bold tracking-widest uppercase"></p>
                 </div>
             </div>
 
-            <div class="glass p-10">
-                <h3 class="text-xs font-black text-gray-500 uppercase tracking-[0.4em] mb-6 border-b border-white/5 pb-4">Channel Core DNA</h3>
-                <p id="description" class="text-sm text-gray-400 leading-relaxed font-light italic"></p>
+            <div class="glass p-8">
+                <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Channel DNA</h3>
+                <p id="description" class="text-sm text-gray-400 leading-relaxed italic"></p>
             </div>
-
         </div>
     </div>
 
-    <div style="position: fixed; bottom: 20px; right: 20px; opacity: 0.05; cursor: pointer; font-size: 8px; font-family: monospace;" 
-         onclick="window.location.href='admin.html'">CORE_ACCESS_v1.2</div>
+    <div style="position: fixed; bottom: 20px; right: 20px; opacity: 0.1; cursor: pointer; font-size: 8px;" 
+         onclick="window.location.href='admin.html'">CORE_v1.2</div>
 
     <script>
         async function getStatistics() {
             const input = document.getElementById('channelInput').value.trim();
             if (!input) return;
-
-            // Local Block Check
-            const blockUntil = localStorage.getItem('blockUntil');
-            if (blockUntil && new Date().getTime() < blockUntil) {
-                alert("Xavfsizlik tizimi: Siz vaqtincha bloklangansiz!");
-                return;
-            }
 
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('result').classList.add('hidden');
@@ -107,126 +88,99 @@
             try {
                 const res = await fetch('/.netlify/functions/get-yt-data', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: input })
                 });
                 
-                if (res.status === 403) { alert("⚠️ IP BLOCK DETECTED"); return; }
                 const data = await res.json();
-
-                // Badword Check & Strike
-                if (data.badwords && data.badwords.some(w => input.toLowerCase().includes(w.toLowerCase()))) {
-                    handleStrike();
-                    return;
-                }
-
-                if (data.channel && data.recentVideos) {
+                if (data.channel) {
                     renderUI(data);
                 } else {
-                    alert("Kanal topilmadi! Iltimos, @handle'ni to'g'ri yozing.");
+                    alert("Kanal topilmadi!");
                 }
-            } catch (e) { 
+            } catch (e) {
                 console.error(e);
-                alert("Server Error: Tizimga ulanishda xatolik."); 
+                alert("Tizimda ulanishda xatolik yuz berdi.");
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
             }
-            finally { document.getElementById('loading').classList.add('hidden'); }
         }
 
         function renderUI(data) {
             const c = data.channel;
-            const vids = data.recentVideos;
+            const vids = data.recentVideos || [];
             
             document.getElementById('result').classList.remove('hidden');
             document.getElementById('name').innerText = c.snippet.title;
             document.getElementById('handle').innerText = c.snippet.customUrl || "@" + c.snippet.title;
             document.getElementById('avatar').src = c.snippet.thumbnails.high.url;
-            document.getElementById('description').innerText = c.snippet.description || "Ushbu kanal uchun metama'lumotlar tavsifi berilmagan.";
+            document.getElementById('description').innerText = c.snippet.description || "Tavsif berilmagan.";
 
-            // --- DEEP CALCULATIONS ---
-            const subs = parseInt(c.statistics.subscriberCount) || 1; // 0 bo'lmasligi uchun
-            const totalViews = parseInt(c.statistics.viewCount) || 0;
-            const totalVids = parseInt(c.statistics.videoCount) || 0;
+            const subs = parseInt(c.statistics.subscriberCount) || 1;
+            const views = parseInt(c.statistics.viewCount) || 0;
+            const totalVids = parseInt(c.statistics.videoCount) || 1;
 
-            // 1. Oxirgi videolarning o'rtacha ko'rilishi (Real Traffic)
-            const recentAvgViews = Math.floor(vids.reduce((acc, v) => acc + parseInt(v.statistics.viewCount), 0) / vids.length);
-            
-            // 2. Loyalty Score (Sodiqlik): Obunachilarning qancha qismi oxirgi videolarni ko'ryapti
-            const loyaltyScore = ((recentAvgViews / subs) * 100).toFixed(2);
+            // Deep Calculation Logic
+            let recentAvg = 0;
+            let loyalty = 0;
+            let freq = 0;
 
-            // 3. Upload Frequency (Haftasiga nechta video)
-            const firstVidDate = new Date(vids[vids.length-1].snippet.publishedAt);
-            const lastVidDate = new Date(vids[0].snippet.publishedAt);
-            const daysDiff = (lastVidDate - firstVidDate) / (1000*60*60*24) || 1;
-            const frequency = (vids.length / (daysDiff / 7)).toFixed(1);
+            if (vids.length > 0) {
+                recentAvg = Math.floor(vids.reduce((acc, v) => acc + parseInt(v.statistics.viewCount || 0), 0) / vids.length);
+                loyalty = ((recentAvg / subs) * 100).toFixed(2);
+                
+                const start = new Date(vids[vids.length-1].snippet.publishedAt);
+                const end = new Date(vids[0].snippet.publishedAt);
+                const diff = Math.max(1, (end - start) / (1000*60*60*24));
+                freq = (vids.length / (diff / 7)).toFixed(1);
+            }
 
-            // 4. Taxminiy umumiy ko'rish soati (O'rtacha 4 daqiqa/video deb olsak)
-            const estWatchHours = Math.floor((totalViews * 4) / 60).toLocaleString();
-
-            // Main Grid UI
+            // UI Rendering
             document.getElementById('mainStatsGrid').innerHTML = `
-                <div class="stat-card border-l-4 border-l-blue-600">
-                    <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Fan Loyalty</p>
-                    <p class="text-2xl font-black text-blue-500">${loyaltyScore}%</p>
+                <div class="stat-card">
+                    <p class="text-[9px] text-gray-500 uppercase mb-1">Loyalty (Sodiqlik)</p>
+                    <p class="text-xl font-black text-blue-500">${loyalty}%</p>
                 </div>
-                <div class="stat-card border-l-4 border-l-red-600">
-                    <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Real Traffic</p>
-                    <p class="text-2xl font-black">${recentAvgViews.toLocaleString()}</p>
+                <div class="stat-card">
+                    <p class="text-[9px] text-gray-500 uppercase mb-1">Real Avg Views</p>
+                    <p class="text-xl font-black">${recentAvg.toLocaleString()}</p>
                 </div>
-                <div class="stat-card border-l-4 border-l-green-600">
-                    <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Frequency</p>
-                    <p class="text-2xl font-black">${frequency}<span class="text-[10px] text-gray-600 ml-1">v/w</span></p>
+                <div class="stat-card">
+                    <p class="text-[9px] text-gray-500 uppercase mb-1">Frequency</p>
+                    <p class="text-xl font-black">${freq} v/w</p>
                 </div>
-                <div class="stat-card border-l-4 border-l-yellow-600">
-                    <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Watch Hours</p>
-                    <p class="text-2xl font-black text-yellow-500">~${estWatchHours}</p>
+                <div class="stat-card">
+                    <p class="text-[9px] text-gray-500 uppercase mb-1">Watch Hours</p>
+                    <p class="text-xl font-black text-yellow-500">~${Math.floor(views * 0.06).toLocaleString()}</p>
                 </div>
             `;
-
-            // Detailed Intelligence UI
-            const channelAge = Math.floor((new Date() - new Date(c.snippet.publishedAt)) / (1000 * 60 * 60 * 24));
-            const momentum = recentAvgViews > (totalViews/totalVids) ? "UP (Trending)" : "STABLE";
 
             document.getElementById('detailedStats').innerHTML = `
-                <div class="space-y-1">
-                    <p class="text-[10px] text-gray-600 uppercase font-bold tracking-widest">Channel Momentum</p>
-                    <p class="text-lg font-black ${momentum.includes('UP') ? 'text-green-500 neon-text-green' : 'text-white'}">${momentum}</p>
+                <div class="border-l-2 border-red-600 pl-4">
+                    <p class="text-[10px] text-gray-500 uppercase">Momentum</p>
+                    <p class="text-sm font-bold">${recentAvg > (views/totalVids) ? 'O\'SISHDA (TRENDING)' : 'BARQAROR'}</p>
                 </div>
-                <div class="space-y-1">
-                    <p class="text-[10px] text-gray-600 uppercase font-bold tracking-widest">Content Strategy</p>
-                    <p class="text-lg font-black">${frequency > 3 ? 'Aggressive Growth' : 'Consistent Quality'}</p>
+                <div class="border-l-2 border-red-600 pl-4">
+                    <p class="text-[10px] text-gray-500 uppercase">Node Age</p>
+                    <p class="text-sm font-bold">${Math.floor((new Date() - new Date(c.snippet.publishedAt))/(1000*60*60*24))} Kun</p>
                 </div>
-                <div class="space-y-1">
-                    <p class="text-[10px] text-gray-600 uppercase font-bold tracking-widest">Global Reach</p>
-                    <p class="text-lg font-black">${c.snippet.country || 'International'}</p>
+                <div class="border-l-2 border-red-600 pl-4">
+                    <p class="text-[10px] text-gray-500 uppercase">Total Node Views</p>
+                    <p class="text-sm font-bold">${views.toLocaleString()}</p>
                 </div>
-                <div class="space-y-1">
-                    <p class="text-[10px] text-gray-600 uppercase font-bold tracking-widest">Node Age</p>
-                    <p class="text-lg font-black">${channelAge.toLocaleString()} Days</p>
+                <div class="border-l-2 border-red-600 pl-4">
+                    <p class="text-[10px] text-gray-500 uppercase">Strategy</p>
+                    <p class="text-sm font-bold">${freq > 3 ? 'Aggressive' : 'Consistent'}</p>
                 </div>
             `;
 
-            // Evolutionary Rank Logic
+            // Rank Logic
             let rank = "C";
-            let status = "Incubator Node";
-            if(subs > 1000000 && loyaltyScore > 5) { rank = "S+"; status = "Neural Alpha"; }
-            else if(subs > 500000) { rank = "S"; status = "Apex Channel"; }
-            else if(subs > 100000) { rank = "A"; status = "Verified Matrix"; }
-            else if(subs > 50000) { rank = "B+"; status = "High Potential"; }
+            let status = "Stable Node";
+            if(subs > 1000000) { rank = "S+"; status = "Neural Alpha"; }
+            else if(subs > 100000) { rank = "A"; status = "Verified Pro"; }
 
             document.getElementById('rankBadge').innerText = rank;
             document.getElementById('statusText').innerText = status;
-        }
-
-        function handleStrike() {
-            let s = parseInt(localStorage.getItem('userStrikes') || '0') + 1;
-            localStorage.setItem('userStrikes', s);
-            if(s >= 3) {
-                localStorage.setItem('blockUntil', new Date().getTime() + 1200000);
-                alert("🚨 PROTOKOL BUZILDI! Siz 20 daqiqaga bloklandingiz.");
-            } else {
-                alert(`⚠️ Ogohlantirish: Taqiqlangan so'rov! Strike: ${s}/3`);
-            }
-            location.reload();
         }
 
         document.getElementById('channelInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') getStatistics(); });
