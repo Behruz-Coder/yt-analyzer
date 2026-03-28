@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Kanal Analitikasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Gradient fon va animatsiyalar */
+        body {
+            background: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .loader {
+            border-top-color: #ff0000;
+            animation: spinner 1s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <div class="container mx-auto px-4 py-12 flex flex-col items-center">
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-black mb-4 tracking-tight">YT <span class="text-red-500">STATS</span></h1>
+            <p class="text-gray-400">Istalgan kanal statistikasini lahzalarda bilib oling</p>
+        </div>
+        
+        <div class="w-full max-w-2xl glass p-8 rounded-2xl shadow-2xl mb-12">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input type="text" id="channelInput" placeholder="@username yoki kanal nomi..." 
+                    class="flex-grow px-6 py-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all">
+                <button onclick="getStatistics()" 
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold px-10 py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-red-900/20">
+                    Tekshirish
+                </button>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden flex flex-col items-center mb-10">
+            <div class="loader ease-linear rounded-full border-4 border-gray-700 h-12 w-12 mb-4"></div>
+            <p class="text-sm font-medium">YouTube ma'lumotlari tahlil qilinmoqda...</p>
+        </div>
+
+        <div id="result" class="hidden w-full max-w-5xl">
+            <div class="glass p-8 rounded-3xl mb-8 flex flex-col md:flex-row items-center gap-8 border-l-8 border-red-600">
+                <img id="channelAvatar" src="" alt="Avatar" class="w-32 h-32 rounded-full border-4 border-white/20 shadow-2xl">
+                <div class="text-center md:text-left">
+                    <h2 id="channelName" class="text-4xl font-extrabold"></h2>
+                    <p id="channelDesc" class="text-gray-400 mt-3 max-w-2xl italic"></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass p-8 rounded-3xl text-center transform hover:scale-105 transition-transform">
+                    <p class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Obunachilar</p>
+                    <p id="subCount" class="text-5xl font-black text-red-500"></p>
+                </div>
+                <div class="glass p-8 rounded-3xl text-center transform hover:scale-105 transition-transform">
+                    <p class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Jami ko'rishlar</p>
+                    <p id="viewCount" class="text-5xl font-black text-blue-400"></p>
+                </div>
+                <div class="glass p-8 rounded-3xl text-center transform hover:scale-105 transition-transform">
+                    <p class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2">Videolar soni</p>
+                    <p id="videoCount" class="text-5xl font-black text-green-400"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="error" class="hidden glass border-red-900/50 bg-red-900/20 p-6 rounded-2xl text-center mt-10">
+            <p id="errorText" class="text-red-400 font-bold"></p>
+        </div>
+
+    </div>
+
+    <script>
+        async function getStatistics() {
+            const username = document.getElementById('channelInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+
+            if (!username) return;
+
+            // Tozalash va yuklashni boshlash
+            resultDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+
+            try {
+                // Netlify funksiyasiga so'rov
+                const response = await fetch('/.netlify/functions/get-yt-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Ma'lumotlarni joylashtirish
+                    document.getElementById('channelAvatar').src = data.snippet.thumbnails.high.url;
+                    document.getElementById('channelName').innerText = data.snippet.title;
+                    document.getElementById('channelDesc').innerText = data.snippet.description || "Tavsif mavjud emas.";
+                    
+                    // Raqamlarni chiroyli formatda chiqarish
+                    document.getElementById('subCount').innerText = Number(data.statistics.subscriberCount).toLocaleString();
+                    document.getElementById('viewCount').innerText = Number(data.statistics.viewCount).toLocaleString();
+                    document.getElementById('videoCount').innerText = Number(data.statistics.videoCount).toLocaleString();
+
+                    resultDiv.classList.remove('hidden');
+                } else {
+                    document.getElementById('errorText').innerText = "Kanal topilmadi yoki xatolik yuz berdi.";
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                document.getElementById('errorText').innerText = "Server bilan aloqa uzildi.";
+                errorDiv.classList.remove('hidden');
+            } finally {
+                loadingDiv.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
