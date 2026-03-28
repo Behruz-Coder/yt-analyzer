@@ -2,79 +2,38 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>YT-PRO | SECURITY ROOT v1.2</title>
+    <title>YT-PRO | ROOT TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; font-family: 'Courier New', monospace; color: #0f0; overflow-x: hidden; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; }
+        .glitch { border: 1px solid #0f0; box-shadow: 0 0 10px #0f0; }
         .hidden { display: none !important; }
-        .glitch-border { border: 1px solid #0f0; box-shadow: 0 0 15px rgba(0, 255, 0, 0.2); }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #0f0; }
-        .scanline {
-            width: 100%; height: 2px; background: rgba(0, 255, 0, 0.1);
-            position: fixed; top: 0; left: 0; z-index: 100;
-            animation: scan 4s linear infinite;
-        }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
-<body class="p-6 md:p-10">
-    <div class="scanline text-none pointer-events-none"></div>
-
-    <div id="authScreen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[200]">
-        <div class="text-center mb-8">
-            <h2 class="text-2xl font-bold animate-pulse tracking-[0.5em]">TERMINAL ACCESS</h2>
-            <p class="text-[10px] opacity-50 mt-2">RESTRICTED AREA - AUTHORIZED PERSONNEL ONLY</p>
-        </div>
-        <input type="password" id="rootPass" autofocus
-            class="bg-transparent border border-green-500/30 p-4 outline-none text-center text-2xl tracking-[0.8em] w-80 mb-6 focus:border-green-500 transition-all">
-        <button onclick="checkAuth()" class="border border-green-500 px-12 py-3 hover:bg-green-500 hover:text-black font-bold transition-all duration-300">DECRYPT</button>
+<body class="p-10">
+    <div id="auth" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+        <h2 class="mb-5 tracking-widest animate-pulse">SYSTEM ACCESS REQUIRED</h2>
+        <input type="password" id="pass" class="bg-black border-b border-green-500 text-center text-2xl outline-none mb-5">
+        <button onclick="login()" class="border border-green-500 px-10 py-2 hover:bg-green-500 hover:text-black transition">ENTER</button>
     </div>
 
-    <div id="adminContent" class="max-w-6xl mx-auto hidden animate-in fade-in duration-700">
-        <header class="flex justify-between items-center border-b border-green-900 pb-6 mb-10">
-            <div>
-                <h1 class="text-3xl font-black italic tracking-tighter uppercase">Root<span class="text-white opacity-20">@</span>YT-PRO</h1>
-                <p class="text-[9px] text-green-800">KERNEL_VERSION: 1.2.0-STABLE // ENCRYPTED_CONNECTION</p>
-            </div>
-            <button onclick="location.href='index.html'" class="text-[10px] border border-red-900 text-red-900 px-4 py-2 hover:bg-red-900 hover:text-white transition">DISCONNECT</button>
+    <div id="main" class="max-w-6xl mx-auto hidden">
+        <header class="flex justify-between border-b border-green-900 pb-5 mb-10">
+            <h1 class="text-2xl font-bold">PRO_ROOT_v1.2</h1>
+            <span id="status" class="text-xs">○ WAITING...</span>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 glitch-border p-6 rounded-lg bg-black/50 backdrop-blur-md relative overflow-hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-green-500">Live Node Traffic</h3>
-                    <span id="statusPing" class="text-[8px] text-green-500 animate-pulse">● SYSTEM_IDLE</span>
-                </div>
-                
-                <div id="logs" class="space-y-3 h-[550px] overflow-y-auto pr-4 font-mono text-[11px]">
-                    <p class="opacity-30">Waiting for data stream...</p>
-                </div>
-                
-                <button onclick="loadLogs()" class="w-full mt-6 border border-green-500/50 py-3 text-[10px] font-bold hover:bg-green-500 hover:text-black transition-all">REFRESH_STREAM</button>
+            <div class="lg:col-span-2 glitch p-6 rounded bg-black/50">
+                <h3 class="text-xs mb-4 text-green-700">LIVE_NODE_LOGS</h3>
+                <div id="logs" class="h-[500px] overflow-y-auto space-y-2 text-[10px]"></div>
+                <button onclick="loadLogs()" class="w-full mt-4 border border-green-800 py-2 hover:bg-green-900">REFRESH</button>
             </div>
-            
             <div class="space-y-6">
-                <div class="glitch-border p-6 rounded-lg bg-black/50">
-                    <h3 class="text-xs font-bold uppercase tracking-widest mb-4 text-green-700">Content Firewall</h3>
-                    <input type="text" id="badword" 
-                        class="w-full bg-black border border-green-900 p-3 text-sm mb-4 outline-none focus:border-green-500 placeholder:text-green-900" 
-                        placeholder="Add forbidden keyword...">
-                    <button onclick="addWord()" class="w-full bg-green-900/20 border border-green-900 text-green-500 py-3 font-bold text-[10px] hover:bg-green-500 hover:text-black transition">INJECT_PROTOCOL</button>
-                </div>
-
-                <div class="glitch-border p-6 rounded-lg bg-black/50">
-                    <h3 class="text-xs font-bold uppercase tracking-widest mb-4 text-green-700">System Uptime</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="text-center border border-green-900 p-2">
-                            <p class="text-[8px] opacity-50">NODES</p>
-                            <p id="nodeCount" class="text-xl">0</p>
-                        </div>
-                        <div class="text-center border border-green-900 p-2 text-red-500">
-                            <p class="text-[8px] opacity-50 uppercase">Alerts</p>
-                            <p id="alertCount" class="text-xl">0</p>
-                        </div>
-                    </div>
+                <div class="glitch p-6 rounded">
+                    <h3 class="text-xs mb-4 text-green-700">FIREWALL_CONFIG</h3>
+                    <input type="text" id="word" class="w-full bg-transparent border border-green-900 p-2 text-xs mb-3 outline-none" placeholder="Keyword...">
+                    <button onclick="addWord()" class="w-full bg-green-900 text-black font-bold py-2 text-xs">INJECT</button>
                 </div>
             </div>
         </div>
@@ -82,88 +41,44 @@
 
     <script>
         const API = "/.netlify/functions/get-yt-data";
-        const PASS = "YtAdmins"; 
+        let PASS = "";
 
-        function checkAuth() {
-            if(document.getElementById('rootPass').value === PASS) {
-                document.getElementById('authScreen').classList.add('hidden');
-                document.getElementById('adminContent').classList.remove('hidden');
-                loadLogs();
-            } else { 
-                alert("UNAUTHORIZED ACCESS DETECTED"); 
-                document.getElementById('rootPass').value = "";
-            }
+        function login() {
+            PASS = document.getElementById('pass').value;
+            document.getElementById('auth').classList.add('hidden');
+            document.getElementById('main').classList.remove('hidden');
+            loadLogs();
         }
 
         async function loadLogs() {
-            document.getElementById('statusPing').innerText = "○ FETCHING_DATA...";
-            try {
-                const res = await fetch(API, { 
-                    method:'POST', 
-                    body: JSON.stringify({ action:'get_logs', password:PASS })
-                });
-                const logs = await res.json();
-                
-                // Bloklangan IP'larni aniqlash (oddiy mantiq bilan)
-                renderLogs(logs);
-                document.getElementById('nodeCount').innerText = logs.length;
-                document.getElementById('alertCount').innerText = logs.filter(l => l.channel_username.includes('🚨')).length;
-                document.getElementById('statusPing').innerText = "● SYSTEM_ONLINE";
-            } catch(e) {
-                document.getElementById('statusPing').innerText = "● CONNECTION_ERROR";
-            }
-        }
-
-        function renderLogs(logs) {
-            const container = document.getElementById('logs');
-            container.innerHTML = logs.map(l => {
-                const isStrike = l.channel_username.includes('🚨');
-                return `
-                <div class="border-b border-green-900/20 py-3 flex justify-between items-center group">
-                    <div class="flex flex-col">
-                        <span class="${isStrike ? 'text-red-500 animate-pulse' : 'text-green-400'}">
-                            ${isStrike ? '[STRIKE]' : '[INFO]'} ${l.channel_username}
-                        </span>
-                        <span class="opacity-30 text-[9px] mt-1">${l.ip_address} // ${new Date(l.created_at).toLocaleTimeString()}</span>
-                    </div>
-                    <div class="flex gap-3">
-                        <button onclick="handleSecurity('${l.ip_address}', 'toggle_block')" 
-                            class="border border-red-900 text-red-900 px-3 py-1 hover:bg-red-600 hover:text-white transition text-[9px] font-bold">
-                            BLOCK
-                        </button>
-                        <button onclick="handleSecurity('${l.ip_address}', 'whitelist_ip')" 
-                            class="border border-green-900 text-green-900 px-3 py-1 hover:bg-green-600 hover:text-black transition text-[9px] font-bold">
-                            UNBLOCK
-                        </button>
+            document.getElementById('status').innerText = "○ CONNECTING...";
+            const res = await fetch(API, { method:'POST', body: JSON.stringify({ action:'get_logs', password:PASS })});
+            const logs = await res.json();
+            const cont = document.getElementById('logs');
+            cont.innerHTML = logs.map(l => `
+                <div class="flex justify-between items-center border-b border-green-900/30 py-2">
+                    <span>> ${l.channel_username} <span class="opacity-30">[${l.ip_address}]</span></span>
+                    <div class="flex gap-2">
+                        <button onclick="act('${l.ip_address}', 'toggle_block')" class="text-red-500 hover:underline">BLOCK</button>
+                        <button onclick="act('${l.ip_address}', 'whitelist_ip')" class="text-blue-500 hover:underline">UNBLOCK</button>
                     </div>
                 </div>
-                `;
-            }).join('');
+            `).join('');
+            document.getElementById('status').innerText = "● ONLINE";
         }
 
-        async function handleSecurity(ip, action) {
-            const confirmMsg = action === 'toggle_block' ? `IP ${ip} ni bloklashni tasdiqlaysizmi?` : `IP ${ip} ni blokdan chiqarishni tasdiqlaysizmi?`;
-            if(!confirm(confirmMsg)) return;
-
-            await fetch(API, { 
-                method:'POST', 
-                body: JSON.stringify({ action: action, password:PASS, ip_address: ip })
-            });
-            
-            alert("PROTOCOL_EXECUTED_SUCCESSFULLY");
+        async function act(ip, type) {
+            await fetch(API, { method:'POST', body: JSON.stringify({ action:type, password:PASS, ip_address:ip })});
+            alert("EXECUTED");
             loadLogs();
         }
 
         async function addWord() {
-            const word = document.getElementById('badword').value;
-            if(!word) return;
-            await fetch(API, { method:'POST', body: JSON.stringify({ action:'add_badword', password:PASS, word: word })});
-            alert("KEYWORD_INJECTED_INTO_CORE");
-            document.getElementById('badword').value = "";
+            const w = document.getElementById('word').value;
+            await fetch(API, { method:'POST', body: JSON.stringify({ action:'add_badword', password:PASS, word:w })});
+            alert("INJECTED");
+            document.getElementById('word').value = "";
         }
-
-        // Enter orqali kirish
-        document.getElementById('rootPass').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkAuth(); });
     </script>
 </body>
 </html>
