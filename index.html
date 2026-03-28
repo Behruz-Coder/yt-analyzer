@@ -3,291 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT Pro Analyst - Control Center</title>
+    <title>YT Analyst PRO - Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #050507; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        body { background: #050507; color: white; font-family: sans-serif; }
         .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .admin-tab.active { background: #ef4444; color: white; shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
-        .danger-glow { animation: pulse-red 2s infinite; }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .admin-tab.active { background: #ef4444; color: white; }
+        .danger-glow { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); border-color: #ef4444 !important; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-6">
 
-    <div id="userInterface" class="max-w-6xl mx-auto">
-        <div class="text-center mb-12">
-            <h1 class="text-5xl font-extrabold tracking-tighter uppercase italic">YT<span class="text-red-600">Analyst</span></h1>
-            <p class="text-gray-500 text-[10px] tracking-[0.5em] mt-2 font-bold">PREMIUM YOUTUBE INTELLIGENCE</p>
+    <div id="mainUI" class="max-w-4xl mx-auto mt-10">
+        <h1 class="text-4xl font-black text-center mb-10 italic uppercase">YT<span class="text-red-600">Analyst</span></h1>
+        
+        <div id="searchBox" class="glass p-4 rounded-3xl flex gap-3 border border-white/10 transition-all duration-500">
+            <input type="text" id="channelInput" placeholder="Kanal @handle..." class="flex-grow bg-transparent p-3 outline-none">
+            <button onclick="getStatistics()" id="searchBtn" class="bg-red-600 px-8 py-3 rounded-2xl font-bold">TAHLIL</button>
         </div>
 
-        <div id="searchBox" class="glass p-4 rounded-3xl flex flex-col md:flex-row gap-4 mb-10 shadow-2xl transition-all duration-500">
-            <input type="text" id="channelInput" placeholder="Kanal nomi yoki @handle..." 
-                class="flex-grow bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-red-600 transition text-white">
-            <button onclick="getStatistics()" id="searchBtn" class="bg-red-600 hover:bg-red-700 px-10 py-4 rounded-2xl font-bold transition-all active:scale-95 whitespace-nowrap">
-                TAHLIL QILISH
-            </button>
+        <div id="result" class="hidden mt-10 glass p-8 rounded-[2rem] text-center">
+            <img id="avatar" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-red-600">
+            <h2 id="name" class="text-2xl font-bold"></h2>
+            <p id="handle" class="text-red-500"></p>
         </div>
-
-        <div id="loading" class="hidden text-center py-10">
-            <div class="animate-spin h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p class="text-gray-500 text-xs animate-pulse font-mono">Ma'lumotlar tahlil qilinmoqda...</p>
-        </div>
-
-        <div id="result" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div class="glass p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
-                <img id="avatar" src="" class="w-32 h-32 rounded-3xl border-4 border-white/5 shadow-2xl object-cover">
-                <div class="text-center md:text-left">
-                    <h2 id="name" class="text-4xl font-black tracking-tight"></h2>
-                    <p id="handle" class="text-red-500 font-mono text-sm mt-1"></p>
-                    <p id="desc" class="text-gray-400 text-sm mt-4 line-clamp-2 max-w-2xl"></p>
-                </div>
-            </div>
-            </div>
     </div>
 
-    <div id="adminModal" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4 backdrop-blur-xl">
-        <div class="glass w-full max-w-5xl h-[85vh] rounded-[3rem] flex flex-col overflow-hidden shadow-[0_0_100px_rgba(239,68,68,0.1)]">
-            
-            <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/5">
-                <div>
-                    <h2 class="text-2xl font-black text-red-600 italic uppercase">Security Control</h2>
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Master Access Level</p>
-                </div>
-                <button onclick="closeAdmin()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition">✕</button>
+    <div id="adminModal" class="hidden fixed inset-0 bg-black/95 z-[100] p-6 flex items-center justify-center">
+        <div class="glass w-full max-w-4xl h-[80vh] rounded-[3rem] flex flex-col overflow-hidden">
+            <div class="p-6 border-b border-white/5 flex justify-between bg-white/5">
+                <h2 class="font-bold text-red-600 uppercase">Master Control</h2>
+                <button onclick="closeAdmin()">✕</button>
             </div>
 
             <div id="adminAuth" class="flex-grow flex flex-col items-center justify-center p-10">
-                <div class="bg-red-600/10 p-5 rounded-3xl mb-6 border border-red-600/20">
-                    <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                </div>
-                <input type="password" id="adminPassInput" placeholder="Password..." 
-                    class="bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-2xl tracking-[0.5em] mb-4 w-full max-w-xs outline-none focus:border-red-600 transition">
-                <button onclick="checkAdminPass()" class="bg-red-600 hover:bg-red-700 px-12 py-4 rounded-2xl font-bold uppercase tracking-widest transition-all">DECRYPT</button>
+                <input type="password" id="adminPass" placeholder="Password" class="bg-white/5 border border-white/10 p-4 rounded-xl text-center mb-4 outline-none focus:border-red-600">
+                <button onclick="authAdmin()" class="bg-red-600 px-10 py-3 rounded-xl font-bold">KIRISH</button>
             </div>
 
-            <div id="adminPanel" class="hidden flex-grow flex flex-col md:flex-row overflow-hidden">
-                <div class="w-full md:w-64 border-r border-white/5 p-6 space-y-2 bg-black/20">
-                    <button onclick="showTab('logs')" class="admin-tab active w-full text-left p-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition">📊 Jonli Loglar</button>
-                    <button onclick="showTab('security')" class="admin-tab w-full text-left p-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition">🚫 Bloklar</button>
-                    <button onclick="showTab('filter')" class="admin-tab w-full text-left p-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition">📝 So'z Filtri</button>
+            <div id="adminContent" class="hidden flex-grow flex overflow-hidden">
+                <div class="w-48 border-r border-white/5 p-4 space-y-2">
+                    <button onclick="loadLogs()" class="w-full text-left p-3 rounded-xl text-xs font-bold hover:bg-white/5">📊 LOGLAR</button>
+                    <button onclick="showFilter()" class="w-full text-left p-3 rounded-xl text-xs font-bold hover:bg-white/5">📝 FILTR</button>
+                    <button onclick="clearLocalBlock()" class="w-full text-left p-3 rounded-xl text-[10px] text-green-500 font-bold border border-green-500/20 mt-10">🔓 O'ZIMNI OCHISH</button>
                 </div>
-
-                <div class="flex-grow p-8 overflow-y-auto">
-                    <div id="tab-logs" class="tab-content space-y-4">
-                        <div class="flex justify-between items-end mb-4">
-                            <h3 class="font-bold text-xl uppercase italic">Oxirgi harakatlar</h3>
-                            <button onclick="loadLogs()" class="text-[10px] bg-white/5 px-4 py-2 rounded-lg hover:bg-white/10">YANGILASH</button>
-                        </div>
-                        <div id="logList" class="space-y-2"></div>
-                    </div>
-
-                    <div id="tab-security" class="tab-content hidden space-y-4">
-                        <h3 class="font-bold text-xl uppercase italic mb-4">Bloklangan qurilmalar</h3>
-                        <div id="blockList" class="space-y-2"></div>
-                    </div>
-
-                    <div id="tab-filter" class="tab-content hidden space-y-6">
-                        <div class="glass p-6 rounded-3xl border-white/10">
-                            <h3 class="font-bold mb-4 uppercase text-xs text-gray-500">Yangi filtr qo'shish</h3>
-                            <div class="flex gap-2">
-                                <input type="text" id="newWordInput" class="flex-grow bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-green-600">
-                                <button onclick="addBadWord()" class="bg-green-600 hover:bg-green-700 px-8 rounded-xl font-bold uppercase text-xs transition">QO'SHISH</button>
-                            </div>
-                        </div>
-                        <div id="badWordCloud" class="flex flex-wrap gap-2"></div>
-                    </div>
-                </div>
+                <div id="adminMain" class="flex-grow p-6 overflow-y-auto"></div>
             </div>
         </div>
     </div>
 
-    <button onclick="openAdmin()" class="fixed bottom-6 right-6 opacity-5 hover:opacity-100 text-[10px] font-mono transition-opacity">SYS_ADMIN_v2</button>
+    <button onclick="openAdmin()" class="fixed bottom-4 right-4 opacity-5 text-[10px]">ADMIN</button>
 
     <script>
-        let currentAdminPass = "";
+        let adminPass = "";
 
-        // --- 1. SAHIFA YUKLANGANDA BLOKNI TEKSHIRISH ---
-        window.onload = function() {
-            checkLocalBlockStatus();
-        };
+        window.onload = checkBlock;
 
-        function checkLocalBlockStatus() {
-            const blockUntil = localStorage.getItem('blockUntil');
-            const searchBtn = document.getElementById('searchBtn');
-            const inputField = document.getElementById('channelInput');
-            const searchBox = document.getElementById('searchBox');
-
-            if (blockUntil) {
-                const now = new Date().getTime();
-                const timeLeft = blockUntil - now;
-
-                if (timeLeft > 0) {
-                    const min = Math.ceil(timeLeft / 60000);
-                    searchBtn.disabled = true;
-                    searchBtn.classList.replace('bg-red-600', 'bg-gray-800');
-                    searchBtn.innerText = `BLOK (${min} min)`;
-                    inputField.disabled = true;
-                    inputField.placeholder = `Qoidabuzarlik! ${min} daqiqadan so'ng ochiladi.`;
-                    searchBox.classList.add('danger-glow');
-                    return true;
-                } else {
-                    localStorage.removeItem('blockUntil');
-                    localStorage.removeItem('userStrikes');
-                    location.reload();
-                }
+        function checkBlock() {
+            const until = localStorage.getItem('blockUntil');
+            if (until && new Date().getTime() < until) {
+                const min = Math.ceil((until - new Date().getTime()) / 60000);
+                document.getElementById('searchBtn').disabled = true;
+                document.getElementById('searchBtn').innerText = `BLOK (${min}m)`;
+                document.getElementById('channelInput').disabled = true;
+                document.getElementById('searchBox').classList.add('danger-glow');
+                return true;
             }
             return false;
         }
 
-        // --- 2. ASOSIY QIDIRUV ---
         async function getStatistics() {
-            if (checkLocalBlockStatus()) return;
+            if (checkBlock()) return;
+            const input = document.getElementById('channelInput').value.trim();
+            if (!input) return;
 
-            const inputField = document.getElementById('channelInput');
-            const input = inputField.value.trim();
-            if(!input) return;
-
-            const loading = document.getElementById('loading');
-            loading.classList.remove('hidden');
-
-            try {
-                // Mahalliy badwords
-                const resBw = await fetch('badwords.json');
-                const localBadWords = await resBw.json();
-                
-                // Backend so'rovi
-                const res = await fetch('/.netlify/functions/get-yt-data', {
-                    method: 'POST',
-                    body: JSON.stringify({ username: input })
-                });
-                const data = await res.json();
-
-                if(res.status === 403) {
-                    alert("🚫 ADMIN TAQIQLADI: IP manzilingiz server tomonidan bloklangan!");
-                    loading.classList.add('hidden');
-                    return;
-                }
-
-                // Dinamik va statik filtrni birlashtirish
-                const allBadWords = [...localBadWords, ...(data.customBadwords || [])];
-                const isForbidden = allBadWords.some(w => input.toLowerCase().includes(w.toLowerCase()));
-
-                if(isForbidden) {
-                    handleStrikeSystem(input);
-                    loading.classList.add('hidden');
-                    return;
-                }
-
-                if(res.ok) {
-                    updateUI(data.channel);
-                } else {
-                    alert("Kanal topilmadi!");
-                }
-
-            } catch (err) {
-                console.error(err);
-                alert("Tizim hatosi!");
-            } finally {
-                loading.classList.add('hidden');
-            }
-        }
-
-        function updateUI(c) {
-            document.getElementById('result').classList.remove('hidden');
-            document.getElementById('name').innerText = c.snippet.title;
-            document.getElementById('handle').innerText = c.snippet.customUrl || "";
-            document.getElementById('avatar').src = c.snippet.thumbnails.high.url;
-            document.getElementById('desc').innerText = c.snippet.description;
-        }
-
-        // --- 3. STRIKE VA LOCAL BLOCK TIZIMI ---
-        function handleStrikeSystem(input) {
-            let strikes = parseInt(localStorage.getItem('userStrikes') || '0');
-            strikes++;
-            localStorage.setItem('userStrikes', strikes);
-
-            if (strikes === 1) {
-                alert("⚠️ OGOHLANTIRISH (1/3)!\nTaqiqlangan so'z ishlatildi.");
-            } else if (strikes === 2) {
-                alert("‼️ OXIRGI OGOHLANTIRISH (2/3)!\nKeyingi safar 1 soatga bloklanasiz!");
-            } else {
-                const blockTime = new Date().getTime() + 3600000; // 1 soat
-                localStorage.setItem('blockUntil', blockTime);
-                alert("🚫 1 SOATGA BLOKLANDINGIZ!\nQoida buzganingiz uchun tizim yopildi.");
-                checkLocalBlockStatus();
-            }
-
-            // Log yozish (Admin panel ko'rishi uchun)
-            fetch('/.netlify/functions/get-yt-data', {
+            const res = await fetch('/.netlify/functions/get-yt-data', {
                 method: 'POST',
-                body: JSON.stringify({ username: `🚨 STRIKE ${strikes}: ` + input })
+                body: JSON.stringify({ username: input })
             });
+            const data = await res.json();
+
+            if (res.status === 403) return alert("IP BLOKLANGAN!");
+
+            // Masofaviy Unblock tekshiruvi
+            if (data.isWhitelisted) {
+                localStorage.removeItem('blockUntil');
+                localStorage.removeItem('userStrikes');
+                location.reload();
+            }
+
+            // Badword tekshiruvi
+            if (data.customBadwords.some(w => input.toLowerCase().includes(w.toLowerCase()))) {
+                return handleStrike(input);
+            }
+
+            if (data.channel) {
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('name').innerText = data.channel.snippet.title;
+                document.getElementById('handle').innerText = data.channel.snippet.customUrl;
+                document.getElementById('avatar').src = data.channel.snippet.thumbnails.high.url;
+            }
         }
 
-        // --- 4. ADMIN PANEL FUNKSIYALARI ---
+        function handleStrike(input) {
+            let s = parseInt(localStorage.getItem('userStrikes') || '0') + 1;
+            localStorage.setItem('userStrikes', s);
+            if (s >= 3) {
+                localStorage.setItem('blockUntil', new Date().getTime() + 3600000);
+                alert("1 SOATGA BLOKLANDINGIZ!");
+            } else {
+                alert(`OGOHLANTIRISH ${s}/3!`);
+            }
+            fetch('/.netlify/functions/get-yt-data', { method: 'POST', body: JSON.stringify({ username: "🚨 STRIKE: " + input }) });
+            checkBlock();
+        }
+
+        // --- ADMIN ---
         function openAdmin() { document.getElementById('adminModal').classList.remove('hidden'); }
         function closeAdmin() { document.getElementById('adminModal').classList.add('hidden'); }
-
-        function checkAdminPass() {
-            const pass = document.getElementById('adminPassInput').value;
-            if(pass === "YtAdmins") {
-                currentAdminPass = pass;
+        
+        function authAdmin() {
+            if (document.getElementById('adminPass').value === "YtAdmins") {
+                adminPass = "YtAdmins";
                 document.getElementById('adminAuth').classList.add('hidden');
-                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('adminContent').classList.remove('hidden');
                 loadLogs();
-            } else { alert("ACCESS DENIED: Parol xato!"); }
-        }
-
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            event.target.classList.add('active');
-            if(tabName === 'logs') loadLogs();
+            } else { alert("Xato!"); }
         }
 
         async function loadLogs() {
-            const list = document.getElementById('logList');
-            list.innerHTML = "<p class='text-center py-10 opacity-20'>Yuklanmoqda...</p>";
-            
-            const res = await fetch('/.netlify/functions/get-yt-data', {
-                method: 'POST',
-                body: JSON.stringify({ action: 'get_logs', password: currentAdminPass })
-            });
+            const res = await fetch('/.netlify/functions/get-yt-data', { method: 'POST', body: JSON.stringify({ action: 'get_logs', password: adminPass }) });
             const logs = await res.json();
-            
-            list.innerHTML = logs.map(l => `
-                <div class="glass p-4 rounded-2xl flex justify-between items-center text-[11px] border-white/5">
-                    <div>
-                        <span class="${l.channel_username.includes('🚨') ? 'text-red-500 font-bold' : 'text-green-500'} font-mono">${l.channel_username}</span>
-                        <p class="text-gray-600 mt-1">${l.ip_address} • ${new Date(l.created_at).toLocaleString()}</p>
+            document.getElementById('adminMain').innerHTML = logs.map(l => `
+                <div class="glass p-3 rounded-xl mb-2 flex justify-between items-center text-[11px]">
+                    <span>${l.channel_username} (${l.ip_address})</span>
+                    <div class="flex gap-2">
+                        <button onclick="remoteAction('toggle_block', '${l.ip_address}')" class="text-red-500">BLOK</button>
+                        <button onclick="remoteAction('whitelist_ip', '${l.ip_address}')" class="text-green-500 font-bold">OQLASH</button>
                     </div>
-                    <button onclick="toggleBlock('${l.ip_address}')" class="bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white px-4 py-2 rounded-xl transition font-bold uppercase text-[9px]">BLOKLASH</button>
                 </div>
             `).join('');
         }
 
-        async function toggleBlock(ip) {
-            if(!confirm(ip + " manzilini bloklash/ochishni xohlaysizmi?")) return;
-            await fetch('/.netlify/functions/get-yt-data', {
-                method: 'POST',
-                body: JSON.stringify({ action: 'toggle_block', password: currentAdminPass, ip_address: ip })
-            });
+        async function remoteAction(action, ip) {
+            await fetch('/.netlify/functions/get-yt-data', { method: 'POST', body: JSON.stringify({ action, password: adminPass, ip_address: ip }) });
+            alert("Bajarildi!");
             loadLogs();
         }
 
-        async function addBadWord() {
-            const word = document.getElementById('newWordInput').value.trim();
-            if(!word) return;
-            await fetch('/.netlify/functions/get-yt-data', {
-                method: 'POST',
-                body: JSON.stringify({ action: 'add_badword', password: currentAdminPass, word: word })
-            });
-            document.getElementById('newWordInput').value = "";
-            alert("Filtrga yangi so'z qo'shildi!");
+        function clearLocalBlock() {
+            localStorage.clear();
+            alert("Lokal blok olindi!");
+            location.reload();
         }
     </script>
 </body>
