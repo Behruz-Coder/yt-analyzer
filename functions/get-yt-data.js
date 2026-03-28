@@ -14,10 +14,10 @@ exports.handler = async (event) => {
         const body = JSON.parse(event.body || '{}');
         const userIP = event.headers['x-nf-client-connection-ip'] || 'unknown';
 
-        // --- 1. ADMIN PANEL BUYRUQLARI ---
+        // --- ADMIN AMALLARI ---
         if (body.password === "YtAdmins") {
             if (body.action === 'get_logs') {
-                const res = await axios.get(`${SUPABASE_URL}/rest/v1/logs?select=*&order=created_at.desc&limit=100`, {
+                const res = await axios.get(`${SUPABASE_URL}/rest/v1/logs?select=*&order=created_at.desc&limit=50`, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
                 return { statusCode: 200, headers, body: JSON.stringify(res.data) };
@@ -28,43 +28,33 @@ exports.handler = async (event) => {
                 });
                 return { statusCode: 200, headers, body: JSON.stringify({ m: "OK" }) };
             }
-            if (body.action === 'toggle_block' || body.action === 'whitelist_ip') {
-                const table = body.action === 'toggle_block' ? 'blocked_users' : 'whitelisted_users';
-                await axios.post(`${SUPABASE_URL}/rest/v1/${table}`, { ip_address: body.ip_address }, {
+            if (body.action === 'toggle_block') {
+                await axios.post(`${SUPABASE_URL}/rest/v1/blocked_users`, { ip_address: body.ip_address }, {
                     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
                 return { statusCode: 200, headers, body: JSON.stringify({ m: "OK" }) };
             }
         }
 
-        // --- 2. XAVFSIZLIK TEKSHIRUVI ---
-        const blockRes = await axios.get(`${SUPABASE_URL}/rest/v1/blocked_users?ip_address=eq.${userIP}`, {
+        // --- FOYDALANUVCHI QISMI ---
+        const blockCheck = await axios.get(`${SUPABASE_URL}/rest/v1/blocked_users?ip_address=eq.${userIP}`, {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
-        const whiteRes = await axios.get(`${SUPABASE_URL}/rest/v1/whitelisted_users?ip_address=eq.${userIP}`, {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-        });
+        if (blockCheck.data.length > 0) return { statusCode: 403, headers, body: "BLOCKED" };
 
-        if (blockRes.data.length > 0 && whiteRes.data.length === 0) {
-            return { statusCode: 403, headers, body: JSON.stringify({ error: "BLOCKED" }) };
-        }
-
-        // --- 3. YOUTUBE QIDIRUV ---
         const username = body.username;
-        if (!username) return { statusCode: 400, headers, body: "Username missing" };
-        
+        if (!username) return { statusCode: 400, headers, body: "No username" };
+
         const cleanName = username.replace('@', '');
         const ytRes = await axios.get(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forHandle=${encodeURIComponent(cleanName)}&key=${YT_API_KEY}`);
-        
-        // --- 4. MA'LUMOTLARNI YUKLASH (Logs va Badwords) ---
+
         // Log yozish
-        await axios.post(`${SUPABASE_URL}/rest/v1/logs`, {
-            channel_username: username,
-            ip_address: userIP
-        }, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }});
+        await axios.post(`${SUPABASE_URL}/rest/v1/logs`, { channel_username: username, ip_address: userIP }, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
 
         // Badwordlarni olish
-        const badWords = await axios.get(`${SUPABASE_URL}/rest/v1/custom_badwords?select=word`, {
+        const bwRes = await axios.get(`${SUPABASE_URL}/rest/v1/custom_badwords?select=word`, {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
 
@@ -73,8 +63,7 @@ exports.handler = async (event) => {
             headers,
             body: JSON.stringify({ 
                 channel: ytRes.data.items ? ytRes.data.items[0] : null,
-                badwords: badWords.data.map(w => w.word),
-                isWhitelisted: whiteRes.data.length > 0
+                badwords: bwRes.data.map(w => w.word)
             })
         };
     } catch (e) {
