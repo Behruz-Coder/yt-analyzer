@@ -2,105 +2,43 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>OWNER TERMINAL v2.4 | Restricted Access</title>
+    <title>Admin Panel | TITAN v2.5</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; }
-        .owner-border { border: 1px solid #0f0; box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); }
-        input { background: transparent; border-bottom: 1px solid #0f0; color: #0f0; outline: none; }
-        .hidden { display: none !important; }
-    </style>
 </head>
-<body class="p-6">
-    <div id="auth" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
-        <h1 class="text-xl mb-8 animate-pulse font-bold tracking-[0.5em]">OWNER IDENTIFICATION</h1>
-        <input type="password" id="rootPass" class="text-center text-3xl mb-8 tracking-widest w-64" autofocus>
-        <button onclick="checkOwner()" class="border border-green-500 px-12 py-3 hover:bg-green-500 hover:text-black transition font-bold">DECRYPT</button>
+<body class="bg-[#020204] text-white p-8">
+    <div class="flex justify-between items-center mb-10">
+        <h1 class="text-3xl font-black text-red-600">Admin Control <span class="text-white font-light text-sm">@operator_878</span></h1>
+        <button onclick="location.href='index.html'" class="px-4 py-2 bg-white/10 rounded-lg">Saytga qaytish</button>
     </div>
 
-    <div id="panel" class="max-w-7xl mx-auto hidden">
-        <div class="flex justify-between items-center border-b border-green-900 pb-4 mb-8">
-            <h1 class="text-xl font-black tracking-tighter">OWNER_INTERFACE_v2.4_ROOT</h1>
-            <div class="flex gap-4">
-                <button onclick="location.href='index.html'" class="text-[10px] border border-green-800 px-4 py-1 hover:bg-green-900 transition font-bold">ASOSIY SAHIFA</button>
-                <span id="ping" class="text-[10px] animate-pulse">● SYSTEM_IDLE</span>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="titan-card">
+            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">Taqiqlangan so'zlar</h3>
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="newWord" class="bg-white/5 border border-white/10 p-2 rounded flex-grow text-sm outline-none">
+                <button onclick="addBadWord()" class="bg-red-600 px-4 rounded">+</button>
+            </div>
+            <div id="wordsList" class="space-y-2 h-40 overflow-y-auto text-xs text-gray-400">
+                </div>
+        </div>
+
+        <div class="titan-card">
+            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">User Management</h3>
+            <div id="userList" class="space-y-3">
+                <div class="flex justify-between items-center text-sm p-2 bg-white/5 rounded">
+                    <span>User: #titan_992</span>
+                    <button class="text-red-500">Block IP</button>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div class="lg:col-span-3 owner-border p-6 rounded bg-black/40">
-                <h3 class="text-xs font-bold mb-6 text-green-700 uppercase tracking-widest">Foydalanuvchi faolligi & Xavfsizlik</h3>
-                <div id="logs" class="h-[600px] overflow-y-auto space-y-3 font-mono text-[10px]">
-                    <p class="opacity-20 text-center py-20 italic">Ma'lumotlar oqimi kutilmoqda...</p>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-                <div class="owner-border p-6 rounded bg-black/40">
-                    <h3 class="text-xs font-bold mb-4 text-green-700 uppercase">Taqiqlangan so'z qo'shish</h3>
-                    <input type="text" id="newWord" class="w-full text-xs p-2 mb-4" placeholder="So'zni kiriting...">
-                    <button onclick="addBadword()" class="w-full bg-green-900/20 border border-green-500 py-2 text-[10px] font-bold hover:bg-green-500 hover:text-black transition">TIZIMGA KIRITISH</button>
-                </div>
-
-                <div class="owner-border p-6 rounded bg-black/40 text-center">
-                    <h3 class="text-xs font-bold mb-4 text-green-700 uppercase">Tizim holati</h3>
-                    <div class="text-2xl font-black" id="logCount">0</div>
-                    <p class="text-[8px] opacity-50 mt-1">UMUMIY QIDIRUVLAR</p>
-                </div>
-            </div>
+        <div class="titan-card">
+            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">Server Status</h3>
+            <p class="text-green-500 text-sm">● YouTube API: Active</p>
+            <p class="text-green-500 text-sm mt-2">● Database: Connected</p>
+            <p class="text-gray-400 text-xs mt-4">Jami qidiruvlar: 14,201</p>
         </div>
     </div>
-
-    <script>
-        const API = "/.netlify/functions/get-yt-data";
-        let PASSWORD = "";
-
-        function checkOwner() {
-            const p = document.getElementById('rootPass').value;
-            if(p === "YtAdmins") {
-                PASSWORD = p;
-                document.getElementById('auth').classList.add('hidden');
-                document.getElementById('panel').classList.remove('hidden');
-                refreshLogs();
-            } else { alert("ACCESS DENIED"); location.reload(); }
-        }
-
-        async function refreshLogs() {
-            document.getElementById('ping').innerText = "○ FETCHING...";
-            const res = await fetch(API, { method:'POST', body: JSON.stringify({ action:'get_logs', password:PASSWORD })});
-            const logs = await res.json();
-            
-            document.getElementById('logCount').innerText = logs.length;
-            const container = document.getElementById('logs');
-            container.innerHTML = logs.map(l => `
-                <div class="flex justify-between items-center border-b border-green-900/20 py-3 hover:bg-green-900/10 transition px-2">
-                    <div class="flex flex-col">
-                        <span class="text-green-400 font-bold">${l.channel_username}</span>
-                        <span class="opacity-30 text-[8px]">${l.ip_address} | ${new Date(l.created_at).toLocaleString()}</span>
-                    </div>
-                    <div class="flex gap-4 font-bold text-[9px]">
-                        <button onclick="executeAction('${l.ip_address}', 'toggle_block')" class="text-red-600 hover:text-white transition">[BLOCK]</button>
-                        <button onclick="executeAction('${l.ip_address}', 'whitelist_ip')" class="text-blue-500 hover:text-white transition">[UNBLOCK]</button>
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('ping').innerText = "● ONLINE";
-        }
-
-        async function executeAction(ip, act) {
-            if(!confirm(`Haqiqatdan ham ushbu amalni [${act}] bajarmoqchimisiz? IP: ${ip}`)) return;
-            await fetch(API, { method:'POST', body: JSON.stringify({ action:act, password:PASSWORD, ip_address:ip })});
-            alert("SUCCESS: PROTOCOL_EXECUTED");
-            refreshLogs();
-        }
-
-        async function addBadword() {
-            const word = document.getElementById('newWord').value;
-            if(!word) return;
-            await fetch(API, { method:'POST', body: JSON.stringify({ action:'add_badword', password:PASSWORD, word })});
-            alert("SUCCESS: KEYWORD_INJECTED");
-            document.getElementById('newWord').value = "";
-        }
-    </script>
 </body>
 </html>
