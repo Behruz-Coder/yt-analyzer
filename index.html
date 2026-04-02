@@ -3,37 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TITAN v2.5 | Ultimate Analytics</title>
+    <title>TITAN v2.5 | Professional YouTube Analysis</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-titan-bg text-titan-text transition-colors duration-500">
-    <nav class="p-5 border-b border-gray-800 flex justify-between items-center sticky top-0 bg-opacity-80 backdrop-blur-lg z-50">
-        <div class="text-3xl font-black text-red-600 tracking-tighter">TITAN <span class="text-xs text-gray-500">v2.5</span></div>
-        <div class="flex items-center gap-5">
-            <select id="langSwitcher" class="bg-transparent border border-gray-700 rounded-lg p-1 text-sm outline-none">
-                <option value="uz-lat">O'zbek (Lotin)</option>
-                <option value="uz-kir">Ўзбек (Кирилл)</option>
-                <option value="ru">Русский</option>
-                <option value="en">English</option>
+<body>
+    <nav class="fixed top-0 w-full z-[100] border-b border-white/10 backdrop-blur-xl py-4 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center font-bold text-white">T</div>
+            <span class="text-2xl font-black">TITAN <span class="text-red-600">v2.5</span></span>
+        </div>
+        <div class="hidden md:flex items-center gap-8 font-medium text-sm uppercase tracking-widest">
+            <a href="#leaderboard" class="hover:text-red-600 transition">Leaderboard</a>
+            <a href="#compare" class="hover:text-red-600 transition">Solishtirish</a>
+            <a href="#history" class="hover:text-red-600 transition">Tarix</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <select id="langSwitcher" class="bg-white/5 border border-white/10 rounded-lg p-2 text-xs">
+                <option value="uz-lat">UZB (LOT)</option>
+                <option value="uz-kir">УЗБ (КИР)</option>
+                <option value="en">ENGLISH</option>
+                <option value="ru">РУССКИЙ</option>
             </select>
-            <button id="themeToggle" class="text-xl hover:scale-110 transition">🌙</button>
-            <div id="authArea">
-                <a href="auth.html" id="loginBtn" class="px-5 py-2 border border-red-600 rounded-full text-sm font-bold hover:bg-red-600 transition">Sign In</a>
-            </div>
+            <button id="themeToggle" class="w-10 h-10 rounded-full border border-white/10 hover:bg-white/5 transition">🌙</button>
+            <a href="auth.html" class="px-6 py-2 bg-red-600 rounded-full font-bold hover:bg-red-700 shadow-lg shadow-red-600/20">Sign In</a>
         </div>
     </nav>
 
-    <header class="py-24 text-center container mx-auto px-4">
-        <h1 class="text-6xl md:text-8xl font-black mb-8 animate-pulse">YouTube <span class="text-red-600">Faktlar</span></h1>
-        <div class="max-w-3xl mx-auto relative group">
-            <input type="text" id="searchInput" placeholder="Kanal nomi yoki handle..." 
-                   class="w-full p-6 rounded-2xl bg-gray-900/50 border-2 border-red-600 focus:outline-none focus:ring-8 focus:ring-red-600/10 text-xl transition-all">
-            <div id="searchDropdown" class="hidden absolute top-full left-0 w-full bg-[#0a0a0c] border border-gray-800 rounded-2xl mt-4 shadow-2xl z-50 overflow-hidden">
-                </div>
+    <header class="min-h-screen flex flex-col justify-center items-center text-center px-4 pt-20">
+        <div class="mb-6 px-4 py-1 border border-red-600/30 rounded-full text-xs font-bold text-red-500 uppercase tracking-widest bg-red-600/5">
+            Powered by YouTube Data API v3
+        </div>
+        <h1 class="section-title">Kanalingizni <br><span class="text-red-600">Raqamlar</span> bilan ko'ring</h1>
+        <p class="max-w-2xl text-gray-400 text-lg mb-12">TITAN v2.5 — bu YouTube ekotizimi uchun eng mukammal tahlil platformasi. Har bir soniyadagi o'zgarishni biz bilan kuzating.</p>
+        
+        <div class="w-full max-w-3xl relative">
+            <input type="text" id="mainSearch" placeholder="Kanal nomi, @handle yoki ID kiriting..." 
+                   class="w-full p-8 rounded-3xl bg-white/5 border-2 border-white/10 focus:border-red-600 focus:outline-none text-xl transition-all shadow-2xl">
+            <div id="searchDropdown" class="hidden absolute top-full left-0 w-full mt-4 titan-card p-0 overflow-hidden z-50"></div>
         </div>
     </header>
+
+    <section id="statsSection" class="hidden py-20 container mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 px-4">
+            <div class="lg:col-span-2 titan-card flex flex-col md:flex-row gap-8 items-center">
+                <img id="chAvatar" src="" class="w-40 h-40 rounded-3xl border-4 border-red-600 shadow-2xl">
+                <div class="text-center md:text-left">
+                    <h2 id="chTitle" class="text-4xl font-black mb-2"></h2>
+                    <p id="chHandle" class="text-gray-500 mb-4"></p>
+                    <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+                        <span class="px-4 py-2 bg-white/5 rounded-xl border border-white/10 text-sm font-bold">📅 <span id="chDate"></span></span>
+                        <span class="px-4 py-2 bg-white/5 rounded-xl border border-white/10 text-sm font-bold">📍 <span id="chCountry"></span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="titan-card flex flex-col items-center justify-center text-center">
+                <p class="uppercase text-xs font-bold tracking-widest text-gray-500 mb-4">Jonli Obunachilar</p>
+                <div id="liveSubs" class="live-number">0</div>
+                <div class="w-full h-1 bg-white/5 mt-6 rounded-full overflow-hidden">
+                    <div class="h-full bg-red-600 animate-pulse" style="width: 70%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <div class="titan-card">
+                <canvas id="viewsChart"></canvas>
+            </div>
+            <div class="titan-card">
+                <canvas id="subsChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <section id="leaderboard" class="py-20 container mx-auto text-center">
+        <h2 class="text-4xl font-black mb-12">Global <span class="text-red-600">Leaderboard</span></h2>
+        <div id="leaderboardGrid" class="grid-container">
+            </div>
+    </section>
+
+    <section id="history" class="py-20 bg-white/5">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-black mb-12">Oxirgi <span class="text-red-600">Qidiruvlar</span></h2>
+            <div id="historyGrid" class="flex flex-wrap justify-center gap-4">
+                </div>
+        </div>
+    </section>
+
+    <footer class="py-20 border-t border-white/5 text-center">
+        <div class="mb-8">
+            <span class="text-3xl font-black">TITAN <span class="text-red-600">v2.5</span></span>
+        </div>
+        <div class="text-gray-500 text-sm mb-4 flex justify-center gap-8">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+            <a href="#">Owner: @operator_878</a>
+        </div>
+        <p class="text-gray-600 text-xs">Barcha huquqlar Behruzbek Qodirberganov tomonidan himoyalangan. 2026</p>
+    </footer>
 
     <script src="main.js"></script>
 </body>
