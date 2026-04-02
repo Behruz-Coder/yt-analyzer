@@ -1,37 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;700;800&display=swap');
+
 :root[data-theme="dark"] {
-    --titan-bg: #020204;
-    --titan-text: #f1f5f9;
-    --titan-card: rgba(255, 255, 255, 0.03);
-    --accent: #ef4444;
+    --bg: #050507;
+    --card: #0f0f12;
+    --text: #ffffff;
+    --accent: #ff0000;
+    --glass: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.08);
 }
 
 :root[data-theme="light"] {
-    --titan-bg: #f8fafc;
-    --titan-text: #0f172a;
-    --titan-card: #ffffff;
-    --accent: #dc2626;
+    --bg: #f3f4f6;
+    --card: #ffffff;
+    --text: #111827;
+    --accent: #e11d48;
+    --glass: rgba(0, 0, 0, 0.02);
+    --border: rgba(0, 0, 0, 0.1);
 }
 
-body {
-    background-color: var(--titan-bg);
-    color: var(--titan-text);
-    font-family: 'Inter', sans-serif;
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+body { background: var(--bg); color: var(--text); overflow-x: hidden; scroll-behavior: smooth; }
+
+/* 9-qism: Custom Animations */
+@keyframes neon-pulse {
+    0% { box-shadow: 0 0 5px var(--accent); }
+    50% { box-shadow: 0 0 25px var(--accent); }
+    100% { box-shadow: 0 0 5px var(--accent); }
 }
 
 .titan-card {
-    background: var(--titan-card);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(5px);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(12px);
 }
 
 .titan-card:hover {
-    transform: scale(1.02);
+    transform: translateY(-10px) scale(1.02);
     border-color: var(--accent);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
-/* 6-qism: Mobile Optimization */
-@media (max-width: 640px) {
-    h1 { font-size: 3rem !important; }
-    input { padding: 1rem !important; font-size: 1rem !important; }
+.section-title { font-size: 3.5rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 1rem; }
+
+/* Responsive Grid (6-qism) */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+}
+
+/* 15-qism: Live Counter Style */
+.live-number {
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
 }
