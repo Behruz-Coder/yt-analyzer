@@ -2,8 +2,8 @@
 <html lang="uz" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Channels | TITAN v2.5</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Qidiruv | TITAN v2.5</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
@@ -11,142 +11,64 @@
 </head>
 <body class="bg-titan-bg text-titan-text min-h-screen pb-20">
 
-    <nav class="p-6 flex justify-between items-center border-b border-white/5 backdrop-blur-md sticky top-0 z-50 bg-titan-bg/80">
+    <nav class="fixed top-0 w-full z-[100] border-b border-white/5 backdrop-blur-xl bg-black/20 py-4 px-6 md:px-12 flex justify-between items-center">
         <div class="flex items-center gap-3 cursor-pointer" onclick="location.href='index.html'">
-            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-600/20">
-                <span class="text-white font-black text-sm">T</span>
+            <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
+                <span class="text-white font-black text-xl">T</span>
             </div>
-            <span class="text-xl font-black tracking-tighter">TITAN <span class="text-red-600">v2.5</span></span>
+            <span class="text-2xl font-black tracking-tighter uppercase hidden sm:block">Titan <span class="text-red-600">Search</span></span>
         </div>
+
+        <div id="navMenu" class="hidden lg:flex items-center gap-8 text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <a href="index.html" class="hover:text-red-600 transition">Asosiy</a>
+            <a href="leaderboard.html" class="hover:text-red-600 transition">Reyting</a>
+            <a id="adminLink" href="admin.html" class="hidden text-yellow-500 border-b border-yellow-500">Admin</a>
+        </div>
+
         <div class="flex items-center gap-4">
-            <button id="themeToggle" class="text-lg">🌙</button>
-            <a href="auth.html" class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center overflow-hidden">
-                <i class="fas fa-user-circle text-xl opacity-50"></i>
-            </a>
+            <button id="themeToggle" class="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center">🌙</button>
+            <button id="mobileMenuBtn" class="lg:hidden text-2xl w-10 h-10 flex items-center justify-center">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
     </nav>
 
-    <header class="py-16 px-6 text-center">
-        <h1 class="text-4xl md:text-5xl font-black mb-6 tracking-tight">Kanalni <span class="text-red-600">Aniqlang</span></h1>
-        <div class="max-w-2xl mx-auto relative group">
+    <header class="pt-32 pb-12 px-6 text-center animate-fade">
+        <h1 class="text-4xl md:text-6xl font-black mb-8 tracking-tighter">Kanalni <span class="text-red-600">Toping</span></h1>
+        
+        <div class="max-w-3xl mx-auto relative group">
             <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-600 transition-colors"></i>
             <input type="text" id="searchInput" 
-                   placeholder="Kanal nomi yoki ID sini kiriting..." 
-                   class="w-full pl-16 pr-32 py-6 rounded-3xl bg-white/5 border border-white/10 text-lg outline-none focus:border-red-600 focus:bg-white/10 transition-all shadow-2xl">
+                   placeholder="Kanal nomi yoki ID sini yozing..." 
+                   class="w-full pl-16 pr-36 py-6 rounded-[2rem] bg-white/5 border border-white/10 text-lg outline-none focus:border-red-600 focus:bg-white/10 transition-all shadow-2xl">
             <button onclick="performSearch()" 
-                    class="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-red-700 transition-all active:scale-95">
+                    class="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 text-white px-8 py-4 rounded-[1.5rem] font-black text-xs tracking-widest hover:bg-red-700 transition-all active:scale-95 shadow-lg shadow-red-600/20">
                 QIDIRISH
             </button>
         </div>
         
-        <div id="searchHistory" class="mt-6 flex flex-wrap justify-center gap-2 opacity-60">
+        <div id="searchHistory" class="mt-8 flex flex-wrap justify-center gap-3 opacity-60">
             </div>
     </header>
 
-    <main class="container mx-auto px-6">
-        <div id="loading" class="hidden flex justify-center py-20">
-            <div class="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+    <main class="container-custom mx-auto px-6">
+        <div id="loading" class="hidden flex flex-col items-center justify-center py-20">
+            <div class="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Ma'lumotlar olinmoqda...</p>
         </div>
 
-        <div id="badwordAlert" class="hidden max-w-2xl mx-auto mb-10 badword-alert text-center animate-fade">
-            ⚠️ Qidiruv so'rovida taqiqlangan so'zlar aniqlandi! Iltimos, odobli bo'ling.
-        </div>
-
-        <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div id="resultsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="col-span-full text-center py-20 border-2 border-dashed border-white/5 rounded-[2rem] opacity-20">
+                <i class="fas fa-cloud-sun text-5xl mb-4"></i>
+                <p class="text-sm font-bold">Hali qidiruv amalga oshirilmadi</p>
             </div>
-    </main>
+        </div>
+    </header>
+
+    <footer class="mt-20 py-10 border-t border-white/5 text-center">
+        <p class="text-[9px] font-black text-gray-600 uppercase tracking-widest">&copy; 2026 TITAN v2.5 ENGINE</p>
+    </footer>
 
     <script src="main.js"></script>
-    <script>
-        // 8-qism: Badwords ro'yxati (Boshlang'ich)
-        const badWords = ['soat', 'yomon_soz2', 'admin_blok']; 
-
-        async function performSearch() {
-            const query = document.getElementById('searchInput').value.trim();
-            const grid = document.getElementById('resultsGrid');
-            const loader = document.getElementById('loading');
-            const alertBox = document.getElementById('badwordAlert');
-
-            if (!query) return;
-
-            // Badwords tekshiruvi
-            if (badWords.some(word => query.toLowerCase().includes(word))) {
-                alertBox.classList.remove('hidden');
-                grid.innerHTML = '';
-                return;
-            } else {
-                alertBox.classList.add('hidden');
-            }
-
-            // UI ni tozalash va loaderni yoqish
-            grid.innerHTML = '';
-            loader.classList.remove('hidden');
-
-            try {
-                // Netlify Function'ga so'rov yuborish
-                const response = await fetch(`/.netlify/functions/get-data?type=search&q=${encodeURIComponent(query)}`);
-                const data = await response.json();
-
-                loader.classList.add('hidden');
-
-                if (data.items && data.items.length > 0) {
-                    renderResults(data.items);
-                    saveToHistory(query); // 10-qism: Tarixga saqlash
-                } else {
-                    grid.innerHTML = `<p class="col-span-full text-center py-20 opacity-50">Hech narsa topilmadi...</p>`;
-                }
-            } catch (error) {
-                loader.classList.add('hidden');
-                console.error("Search Error:", error);
-            }
-        }
-
-        function renderResults(items) {
-            const grid = document.getElementById('resultsGrid');
-            grid.innerHTML = items.map(item => `
-                <div class="titan-card p-6 flex items-center gap-5 animate-fade cursor-pointer hover:bg-white/5" 
-                     onclick="location.href='app.html?id=${item.snippet.channelId}'">
-                    <img src="${item.snippet.thumbnails.medium.url}" 
-                         class="w-20 h-20 rounded-2xl border-2 border-red-600/20 object-cover shadow-lg">
-                    <div class="flex-grow overflow-hidden">
-                        <h3 class="font-bold text-lg truncate">${item.snippet.title}</h3>
-                        <p class="text-xs text-gray-500 mb-3 truncate">${item.snippet.description || 'Tavsif yo'q'}</p>
-                        <span class="px-3 py-1 bg-red-600/10 text-red-600 text-[10px] font-black rounded-lg uppercase tracking-widest">
-                            Tahlil qilish
-                        </span>
-                    </div>
-                    <i class="fas fa-chevron-right opacity-20"></i>
-                </div>
-            `).join('');
-        }
-
-        // 10-qism: Oddiy tarix mantiqi
-        function saveToHistory(q) {
-            let history = JSON.parse(localStorage.getItem('titan_search_history')) || [];
-            if (!history.includes(q)) {
-                history.unshift(q);
-                localStorage.setItem('titan_search_history', JSON.stringify(history.slice(0, 5)));
-            }
-            renderHistory();
-        }
-
-        function renderHistory() {
-            const box = document.getElementById('searchHistory');
-            const history = JSON.parse(localStorage.getItem('titan_search_history')) || [];
-            box.innerHTML = history.map(h => `
-                <span onclick="document.getElementById('searchInput').value='${h}'; performSearch();" 
-                      class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] cursor-pointer hover:border-red-600 hover:text-red-600 transition">
-                    # ${h}
-                </span>
-            `).join('');
-        }
-
-        // Enter tugmasini bosganda qidirish
-        document.getElementById('searchInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') performSearch();
-        });
-
-        window.onload = renderHistory;
-    </script>
 </body>
 </html>
