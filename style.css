@@ -1,63 +1,180 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;700;800&display=swap');
+/* TITAN v2.5 - Professional CSS Framework 
+    Muallif: Behruzbek Qodirberganov
+    Vazifasi: Neon UI, Dark/Light Mode, Responsive Grid
+*/
 
-:root[data-theme="dark"] {
-    --bg: #050507;
-    --card: #0f0f12;
-    --text: #ffffff;
-    --accent: #ff0000;
-    --glass: rgba(255, 255, 255, 0.03);
-    --border: rgba(255, 255, 255, 0.08);
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    /* Dark Mode Ranglari (Default) */
+    --titan-bg: #050507;
+    --titan-card: rgba(255, 255, 255, 0.03);
+    --titan-text: #f8fafc;
+    --titan-accent: #ef4444; /* Qizil */
+    --titan-border: rgba(255, 255, 255, 0.08);
+    --titan-glass: blur(12px);
+    --titan-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
-:root[data-theme="light"] {
-    --bg: #f3f4f6;
-    --card: #ffffff;
-    --text: #111827;
-    --accent: #e11d48;
-    --glass: rgba(0, 0, 0, 0.02);
-    --border: rgba(0, 0, 0, 0.1);
+[data-theme="light"] {
+    /* Light Mode Ranglari */
+    --titan-bg: #f1f5f9;
+    --titan-card: #ffffff;
+    --titan-text: #0f172a;
+    --titan-accent: #dc2626;
+    --titan-border: rgba(0, 0, 0, 0.08);
+    --titan-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-
-body { background: var(--bg); color: var(--text); overflow-x: hidden; scroll-behavior: smooth; }
-
-/* 9-qism: Custom Animations */
-@keyframes neon-pulse {
-    0% { box-shadow: 0 0 5px var(--accent); }
-    50% { box-shadow: 0 0 25px var(--accent); }
-    100% { box-shadow: 0 0 5px var(--accent); }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
+body {
+    background-color: var(--titan-bg);
+    color: var(--titan-text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
+}
+
+/* 9-qism: Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--titan-bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--titan-accent);
+    border-radius: 10px;
+}
+
+/* 26-qism: Global Animatsiyalar */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.animate-fade {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* 6-qism: Reusable Components (Titan Cards) */
 .titan-card {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: var(--titan-card);
+    border: 1px solid var(--titan-border);
+    backdrop-filter: var(--titan-glass);
+    -webkit-backdrop-filter: var(--titan-glass);
     border-radius: 24px;
-    padding: 2rem;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    backdrop-filter: blur(12px);
+    box-shadow: var(--titan-shadow);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease;
 }
 
 .titan-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    border-color: var(--accent);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    transform: translateY(-5px);
+    border-color: var(--titan-accent);
 }
 
-.section-title { font-size: 3.5rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 1rem; }
-
-/* Responsive Grid (6-qism) */
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    padding: 2rem;
+/* Input Styles */
+input, select {
+    background: var(--titan-card);
+    border: 1px solid var(--titan-border);
+    color: var(--titan-text);
+    transition: all 0.3s ease;
 }
 
-/* 15-qism: Live Counter Style */
+input:focus {
+    border-color: var(--titan-accent);
+    outline: none;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+}
+
+/* 15-qism: Live Counter Typography */
 .live-number {
-    font-size: 5rem;
+    font-size: clamp(2rem, 8vw, 5rem);
+    font-weight: 800;
+    letter-spacing: -2px;
+    color: var(--titan-accent);
+    text-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+}
+
+/* 6-qism: Moslashuvchanlik (Responsive Grid) */
+.container-custom {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .titan-card {
+        padding: 1.5rem !important;
+        border-radius: 16px;
+    }
+    
+    .section-title {
+        font-size: 2.5rem !important;
+    }
+
+    nav {
+        padding: 1rem !important;
+    }
+}
+
+/* Battle Mode Effektlari (21-qism) */
+.battle-vs {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.battle-vs::before {
+    content: 'VS';
     font-weight: 900;
-    color: var(--accent);
-    text-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+    font-size: 3rem;
+    color: var(--titan-accent);
+    opacity: 0.1;
+    position: absolute;
+    z-index: -1;
+}
+
+/* 8-qism: Badwords Alert Style */
+.badword-alert {
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid #dc2626;
+    color: #dc2626;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Button UI */
+.btn-primary {
+    background-color: var(--titan-accent);
+    color: white;
+    font-weight: 700;
+    border-radius: 14px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
 }
