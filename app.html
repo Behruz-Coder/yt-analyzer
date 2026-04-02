@@ -2,111 +2,88 @@
 <html lang="uz" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Channel Analytics | TITAN v2.5</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kanal Tahlili | TITAN v2.5</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        @media print {
-            .no-print { display: none; }
-            body { background: white; color: black; }
-            .titan-card { border: 1px solid #ccc; box-shadow: none; }
-        }
-    </style>
 </head>
-<body class="bg-titan-bg text-titan-text min-h-screen">
+<body class="bg-titan-bg text-titan-text min-h-screen pb-20">
 
-    <nav class="p-6 border-b border-white/5 backdrop-blur-xl sticky top-0 z-50 bg-titan-bg/80 no-print flex justify-between items-center">
+    <nav class="fixed top-0 w-full z-[100] border-b border-white/5 backdrop-blur-xl bg-black/20 py-4 px-6 md:px-12 flex justify-between items-center no-print">
         <div class="flex items-center gap-4">
-            <button onclick="history.back()" class="w-10 h-10 rounded-full hover:bg-white/5 transition flex items-center justify-center">
+            <button onclick="history.back()" class="w-10 h-10 rounded-xl hover:bg-white/5 flex items-center justify-center transition">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            <h1 class="text-xl font-black uppercase tracking-tighter">Analytics <span class="text-red-600">Pro</span></h1>
+            <h1 class="text-xl font-black uppercase tracking-tighter">Titan <span class="text-red-600">Analytics</span></h1>
         </div>
         <div class="flex gap-3">
-            <button onclick="window.print()" class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black hover:bg-red-600 transition">
-                <i class="fas fa-file-pdf mr-2"></i> EXPORT PDF
+            <button onclick="window.print()" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black hover:bg-red-600 transition">
+                <i class="fas fa-file-pdf"></i> PDF EXPORT
             </button>
             <button id="themeToggle" class="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center">🌙</button>
         </div>
     </nav>
 
-    <main class="container-custom py-10 space-y-8 animate-fade">
+    <main class="pt-28 container mx-auto px-6 space-y-8">
         
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade">
             <div class="lg:col-span-2 titan-card p-8 flex flex-col md:flex-row items-center gap-8">
-                <div class="relative group">
-                    <img id="chAvatar" src="" class="w-40 h-40 rounded-[2.5rem] border-4 border-red-600 shadow-2xl object-cover">
-                    <div class="absolute -bottom-2 -right-2 bg-red-600 p-2 rounded-lg text-xs font-bold">LIVE</div>
+                <div class="relative">
+                    <img id="chAvatar" src="" class="w-32 h-32 md:w-44 md:h-44 rounded-[2rem] border-4 border-red-600/20 shadow-2xl object-cover">
+                    <div class="absolute -bottom-2 -right-2 bg-red-600 text-[8px] font-black px-3 py-1 rounded-lg">VERIFIED</div>
                 </div>
-                <div class="text-center md:text-left space-y-3 flex-1">
-                    <h2 id="chTitle" class="text-4xl md:text-5xl font-black tracking-tighter">Yuklanmoqda...</h2>
-                    <p id="chHandle" class="text-red-600 font-mono italic opacity-80 text-lg"></p>
-                    <p id="chBio" class="text-gray-500 text-sm line-clamp-2 max-w-xl"></p>
-                    <div class="flex flex-wrap gap-2 pt-2" id="chTags">
-                        </div>
+                <div class="text-center md:text-left space-y-4 flex-1 overflow-hidden">
+                    <h2 id="chTitle" class="text-3xl md:text-5xl font-black tracking-tighter truncate">Yuklanmoqda...</h2>
+                    <p id="chHandle" class="text-red-600 font-mono text-sm opacity-80 italic"></p>
+                    <p id="chBio" class="text-gray-500 text-xs line-clamp-2 leading-relaxed"></p>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
+                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-widest">YouTube Partner</span>
+                        <span id="chCountry" class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-widest">UZ</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="titan-card p-8 bg-gradient-to-br from-red-600/10 to-transparent flex flex-col items-center justify-center relative overflow-hidden">
-                <div class="absolute top-4 left-4 text-[8px] font-black tracking-[0.3em] opacity-30 uppercase">Real-Time Pulse</div>
-                <h3 class="text-xs font-bold text-gray-500 uppercase mb-4">Obunachilar</h3>
-                <div id="liveSubs" class="live-number tabular-nums">0</div>
-                <div class="w-full mt-6 bg-white/5 h-1.5 rounded-full overflow-hidden">
-                    <div id="liveProgress" class="h-full bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all duration-1000 w-0"></div>
+            <div class="titan-card p-8 bg-gradient-to-br from-red-600/5 to-transparent flex flex-col items-center justify-center text-center">
+                <p class="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] mb-6">Real-Time Stats</p>
+                <div id="liveSubs" class="text-5xl md:text-6xl font-black tabular-nums tracking-tighter">0</div>
+                <p class="text-[10px] text-red-600 font-bold mt-4 animate-pulse">● LIVE UPDATING</p>
+                <div class="w-full mt-8 h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div id="liveProgress" class="h-full bg-red-600 transition-all duration-1000 shadow-[0_0_10px_#ef4444]" style="width: 45%"></div>
                 </div>
-                <p class="text-[9px] text-gray-500 mt-4 italic">● Yangilanish: Har 2 soniyada</p>
             </div>
         </section>
 
         <section class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="titan-card p-6 text-center group hover:scale-105 transition-transform">
-                <i class="fas fa-eye text-red-600 mb-3 text-xl"></i>
-                <p class="text-[10px] font-bold text-gray-500 uppercase">Jami Ko'rishlar</p>
-                <h4 id="statViews" class="text-2xl font-black mt-1">0</h4>
+            <div class="titan-card p-6 text-center border-b-4 border-red-600/30">
+                <p class="text-[9px] font-black text-gray-500 uppercase mb-2">Jami Ko'rishlar</p>
+                <h4 id="statViews" class="text-xl font-black">0</h4>
             </div>
-            <div class="titan-card p-6 text-center group hover:scale-105 transition-transform border-b-4 border-red-600">
-                <i class="fas fa-video text-red-600 mb-3 text-xl"></i>
-                <p class="text-[10px] font-bold text-gray-500 uppercase">Videolar Soni</p>
-                <h4 id="statVideos" class="text-2xl font-black mt-1">0</h4>
+            <div class="titan-card p-6 text-center border-b-4 border-blue-600/30">
+                <p class="text-[9px] font-black text-gray-500 uppercase mb-2">Videolar Soni</p>
+                <h4 id="statVideos" class="text-xl font-black">0</h4>
             </div>
-            <div class="titan-card p-6 text-center group hover:scale-105 transition-transform">
-                <i class="fas fa-calendar-alt text-red-600 mb-3 text-xl"></i>
-                <p class="text-[10px] font-bold text-gray-500 uppercase">Ochilgan Sana</p>
-                <h4 id="statDate" class="text-lg font-black mt-1">-</h4>
+            <div class="titan-card p-6 text-center border-b-4 border-green-600/30">
+                <p class="text-[9px] font-black text-gray-500 uppercase mb-2">Engagement Rate</p>
+                <h4 class="text-xl font-black text-green-500">~4.2%</h4>
             </div>
-            <div class="titan-card p-6 text-center group hover:scale-105 transition-transform border-b-4 border-green-500">
-                <i class="fas fa-chart-pie text-green-500 mb-3 text-xl"></i>
-                <p class="text-[10px] font-bold text-gray-500 uppercase">Engagement</p>
-                <h4 id="statEngage" class="text-2xl font-black mt-1">~6.8%</h4>
+            <div class="titan-card p-6 text-center border-b-4 border-yellow-600/30">
+                <p class="text-[9px] font-black text-gray-500 uppercase mb-2">Ochilgan Yili</p>
+                <h4 id="statYear" class="text-xl font-black">2020</h4>
             </div>
         </section>
 
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="titan-card p-8">
-                <div class="flex justify-between items-center mb-8">
-                    <h5 class="font-black text-sm uppercase tracking-widest">O'sish Dinamikasi</h5>
-                    <div class="w-3 h-3 bg-red-600 rounded-full animate-ping"></div>
-                </div>
-                <canvas id="growthChart" height="250"></canvas>
+                <h5 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-8">O'sish Dinamikasi (Views)</h5>
+                <canvas id="growthChart" height="200"></canvas>
             </div>
             <div class="titan-card p-8">
-                <div class="flex justify-between items-center mb-8">
-                    <h5 class="font-black text-sm uppercase tracking-widest">Video Performance</h5>
-                    <i class="fas fa-bolt text-yellow-500"></i>
-                </div>
-                <canvas id="perfChart" height="250"></canvas>
+                <h5 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-8">Video Performance</h5>
+                <canvas id="performanceChart" height="200"></canvas>
             </div>
-        </section>
-
-        <section class="titan-card p-8">
-            <h5 class="text-xl font-black mb-8"><span class="text-red-600">TOP</span> VIDEOLAR</h5>
-            <div id="videosList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                </div>
         </section>
 
     </main>
@@ -117,67 +94,58 @@
         const channelId = urlParams.get('id');
         let currentSubs = 0;
 
-        async function initAnalytics() {
-            if (!channelId) return;
+        async function loadChannelDetails() {
+            if (!channelId) {
+                alert("Kanal ID topilmadi!");
+                location.href = 'search.html';
+                return;
+            }
 
             try {
-                // 1. Kanal ma'lumotlarini olish
                 const res = await fetch(`/.netlify/functions/get-data?type=detail&channelId=${channelId}`);
                 const data = await res.json();
                 const ch = data.items[0];
 
-                // 2. UI ni to'ldirish
+                // UI to'ldirish
                 document.getElementById('chTitle').innerText = ch.snippet.title;
                 document.getElementById('chHandle').innerText = ch.snippet.customUrl || "@" + ch.id;
                 document.getElementById('chAvatar').src = ch.snippet.thumbnails.high.url;
                 document.getElementById('chBio').innerText = ch.snippet.description;
                 document.getElementById('statViews').innerText = formatNumber(ch.statistics.viewCount);
-                document.getElementById('statVideos').innerText = ch.statistics.videoCount;
-                document.getElementById('statDate').innerText = new Date(ch.snippet.publishedAt).getFullYear();
+                document.getElementById('statVideos').innerText = formatNumber(ch.statistics.videoCount);
+                document.getElementById('statYear').innerText = new Date(ch.snippet.publishedAt).getFullYear();
+                document.getElementById('chCountry').innerText = ch.snippet.country || 'Global';
 
-                // 3. Live Counter mantiqi
                 currentSubs = parseInt(ch.statistics.subscriberCount);
                 startLiveCounter();
-
-                // 4. Grafiklar
-                renderCharts();
-
-                // 5. Videolarni yuklash
-                loadTopVideos();
+                initCharts();
 
             } catch (err) {
-                console.error("Load Error:", err);
+                console.error(err);
+                alert("Ma'lumot yuklashda xatolik yuz berdi.");
             }
         }
 
-        // 15-qism: Jonli hisoblagich
         function startLiveCounter() {
             const el = document.getElementById('liveSubs');
-            const progress = document.getElementById('liveProgress');
-            
             setInterval(() => {
-                // Haqiqiy o'sish simulyatsiyasi
-                const chance = Math.random();
-                if (chance > 0.8) currentSubs += 1;
-                
+                // Haqiqiy o'zgarish simulyatsiyasi (YouTube API real time emas)
+                const change = Math.floor(Math.random() * 2);
+                currentSubs += change;
                 el.innerText = formatNumber(currentSubs);
-                
-                // Progress bar harakati
-                let pWidth = (currentSubs % 1000) / 10;
-                progress.style.width = pWidth + "%";
-            }, 2000);
+            }, 3000);
         }
 
-        // Grafiklar (Chart.js)
-        function renderCharts() {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            new Chart(ctx, {
+        function initCharts() {
+            // Growth Chart
+            const ctx1 = document.getElementById('growthChart').getContext('2d');
+            new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: ['Okt', 'Noy', 'Dek', 'Yan', 'Fev', 'Mar'],
+                    labels: ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun'],
                     datasets: [{
                         label: 'Views',
-                        data: [65, 78, 110, 150, 180, 240],
+                        data: [1200, 1900, 3000, 5000, 2000, 3000],
                         borderColor: '#ef4444',
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
                         fill: true,
@@ -185,30 +153,34 @@
                     }]
                 },
                 options: { 
-                    responsive: true, 
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { display: false }, x: { grid: { display: false } } }
+                }
+            });
+
+            // Performance Chart
+            const ctx2 = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Video 1', 'Video 2', 'Video 3', 'Video 4', 'Video 5'],
+                    datasets: [{
+                        label: 'Likes',
+                        data: [400, 800, 600, 900, 500],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 10
+                    }]
+                },
+                options: { 
+                    responsive: true,
                     plugins: { legend: { display: false } },
                     scales: { y: { display: false }, x: { grid: { display: false } } }
                 }
             });
         }
 
-        async function loadTopVideos() {
-            const res = await fetch(`/.netlify/functions/get-data?type=videos&channelId=${channelId}`);
-            const data = await res.json();
-            const list = document.getElementById('videosList');
-            
-            list.innerHTML = data.items.map(v => `
-                <div class="group cursor-pointer">
-                    <div class="relative rounded-xl overflow-hidden mb-3 aspect-video">
-                        <img src="${v.snippet.thumbnails.medium.url}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
-                    </div>
-                    <h6 class="text-[11px] font-bold line-clamp-2 leading-tight group-hover:text-red-600 transition">${v.snippet.title}</h6>
-                    <p class="text-[9px] text-gray-500 mt-2"><i class="fas fa-clock mr-1"></i> Mashhur Video</p>
-                </div>
-            `).join('');
-        }
-
-        window.onload = initAnalytics;
+        window.onload = loadChannelDetails;
     </script>
 </body>
 </html>
