@@ -3,204 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Dashboard | TITAN v2.5</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Channel Analytics | TITAN v2.5</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; color: black; }
+            .titan-card { border: 1px solid #ccc; box-shadow: none; }
+        }
+    </style>
 </head>
-<body class="bg-[#050507] text-white font-['Plus_Jakarta_Sans']">
+<body class="bg-titan-bg text-titan-text min-h-screen">
 
-    <nav class="p-6 border-b border-white/10 flex justify-between items-center sticky top-0 bg-[#050507]/80 backdrop-blur-xl z-50">
+    <nav class="p-6 border-b border-white/5 backdrop-blur-xl sticky top-0 z-50 bg-titan-bg/80 no-print flex justify-between items-center">
         <div class="flex items-center gap-4">
-            <button onclick="location.href='index.html'" class="p-2 hover:bg-white/5 rounded-full transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <button onclick="history.back()" class="w-10 h-10 rounded-full hover:bg-white/5 transition flex items-center justify-center">
+                <i class="fas fa-arrow-left"></i>
             </button>
-            <h1 class="text-xl font-black">TITAN <span class="text-red-600">ANALYTICS</span></h1>
+            <h1 class="text-xl font-black uppercase tracking-tighter">Analytics <span class="text-red-600">Pro</span></h1>
         </div>
-        <div class="flex gap-4">
-            <button onclick="window.print()" class="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-xs font-bold hover:bg-red-600 transition">
-                📥 EXPORT PDF (14-qism)
+        <div class="flex gap-3">
+            <button onclick="window.print()" class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black hover:bg-red-600 transition">
+                <i class="fas fa-file-pdf mr-2"></i> EXPORT PDF
             </button>
-            <button id="compareBtn" class="px-4 py-2 bg-red-600 rounded-lg text-xs font-bold shadow-lg shadow-red-600/20">
-                ⚔️ BATTLE MODE (21-qism)
-            </button>
+            <button id="themeToggle" class="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center">🌙</button>
         </div>
     </nav>
 
-    <main class="container mx-auto p-4 md:p-10 space-y-10">
+    <main class="container-custom py-10 space-y-8 animate-fade">
         
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 titan-card p-8 flex flex-col md:flex-row items-center gap-10">
-                <div class="relative">
-                    <img id="chMainAvatar" src="" class="w-48 h-48 rounded-[2rem] border-4 border-red-600 shadow-2xl object-cover">
-                    <div class="absolute -bottom-4 -right-4 bg-red-600 p-3 rounded-2xl shadow-xl">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
-                    </div>
+            <div class="lg:col-span-2 titan-card p-8 flex flex-col md:flex-row items-center gap-8">
+                <div class="relative group">
+                    <img id="chAvatar" src="" class="w-40 h-40 rounded-[2.5rem] border-4 border-red-600 shadow-2xl object-cover">
+                    <div class="absolute -bottom-2 -right-2 bg-red-600 p-2 rounded-lg text-xs font-bold">LIVE</div>
                 </div>
-                <div class="text-center md:text-left space-y-4">
-                    <h2 id="chMainTitle" class="text-5xl font-black tracking-tighter">Yuklanmoqda...</h2>
-                    <p id="chMainHandle" class="text-red-500 font-mono text-lg italic"></p>
-                    <p id="chDescription" class="text-gray-400 text-sm max-w-xl line-clamp-3"></p>
-                    <div class="flex flex-wrap gap-3 pt-4">
-                        <span id="chTag1" class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-500">YouTube Verified</span>
-                        <span id="chTag2" class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-500">Official Artist</span>
-                    </div>
+                <div class="text-center md:text-left space-y-3 flex-1">
+                    <h2 id="chTitle" class="text-4xl md:text-5xl font-black tracking-tighter">Yuklanmoqda...</h2>
+                    <p id="chHandle" class="text-red-600 font-mono italic opacity-80 text-lg"></p>
+                    <p id="chBio" class="text-gray-500 text-sm line-clamp-2 max-w-xl"></p>
+                    <div class="flex flex-wrap gap-2 pt-2" id="chTags">
+                        </div>
                 </div>
             </div>
 
-            <div class="titan-card p-8 flex flex-col items-center justify-center bg-gradient-to-br from-red-600/10 to-transparent">
-                <span class="text-[10px] font-black tracking-[0.3em] text-red-600 uppercase mb-6">Real-Time Subs</span>
-                <h3 id="liveCounter" class="text-6xl font-black tabular-nums tracking-tighter">0</h3>
-                <p class="text-xs text-gray-500 mt-4 animate-pulse">● Har 2 soniyada yangilanadi</p>
-                <div class="w-full mt-8 space-y-2">
-                    <div class="flex justify-between text-[10px] font-bold">
-                        <span>MAQSAD: 10,000,000</span>
-                        <span id="progressPercent">75%</span>
-                    </div>
-                    <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                        <div id="progressBar" class="h-full bg-red-600 shadow-[0_0_15px_rgba(255,0,0,0.5)] transition-all duration-1000"></div>
-                    </div>
+            <div class="titan-card p-8 bg-gradient-to-br from-red-600/10 to-transparent flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="absolute top-4 left-4 text-[8px] font-black tracking-[0.3em] opacity-30 uppercase">Real-Time Pulse</div>
+                <h3 class="text-xs font-bold text-gray-500 uppercase mb-4">Obunachilar</h3>
+                <div id="liveSubs" class="live-number tabular-nums">0</div>
+                <div class="w-full mt-6 bg-white/5 h-1.5 rounded-full overflow-hidden">
+                    <div id="liveProgress" class="h-full bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all duration-1000 w-0"></div>
                 </div>
+                <p class="text-[9px] text-gray-500 mt-4 italic">● Yangilanish: Har 2 soniyada</p>
             </div>
         </section>
 
         <section class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="titan-card p-6 text-center">
-                <p class="text-xs font-bold text-gray-500 mb-2 uppercase">Jami Ko'rishlar</p>
-                <h4 id="statViews" class="text-2xl font-black">0</h4>
+            <div class="titan-card p-6 text-center group hover:scale-105 transition-transform">
+                <i class="fas fa-eye text-red-600 mb-3 text-xl"></i>
+                <p class="text-[10px] font-bold text-gray-500 uppercase">Jami Ko'rishlar</p>
+                <h4 id="statViews" class="text-2xl font-black mt-1">0</h4>
             </div>
-            <div class="titan-card p-6 text-center border-b-4 border-b-green-500">
-                <p class="text-xs font-bold text-gray-500 mb-2 uppercase">Videolar Soni</p>
-                <h4 id="statVideos" class="text-2xl font-black">0</h4>
+            <div class="titan-card p-6 text-center group hover:scale-105 transition-transform border-b-4 border-red-600">
+                <i class="fas fa-video text-red-600 mb-3 text-xl"></i>
+                <p class="text-[10px] font-bold text-gray-500 uppercase">Videolar Soni</p>
+                <h4 id="statVideos" class="text-2xl font-black mt-1">0</h4>
             </div>
-            <div class="titan-card p-6 text-center">
-                <p class="text-xs font-bold text-gray-500 mb-2 uppercase">O'rtacha Like</p>
-                <h4 id="statLikes" class="text-2xl font-black">Noma'lum</h4>
+            <div class="titan-card p-6 text-center group hover:scale-105 transition-transform">
+                <i class="fas fa-calendar-alt text-red-600 mb-3 text-xl"></i>
+                <p class="text-[10px] font-bold text-gray-500 uppercase">Ochilgan Sana</p>
+                <h4 id="statDate" class="text-lg font-black mt-1">-</h4>
             </div>
-            <div class="titan-card p-6 text-center border-b-4 border-b-red-500">
-                <p class="text-xs font-bold text-gray-500 mb-2 uppercase">Engagement Rate</p>
-                <h4 id="statEngage" class="text-2xl font-black">8.4%</h4>
+            <div class="titan-card p-6 text-center group hover:scale-105 transition-transform border-b-4 border-green-500">
+                <i class="fas fa-chart-pie text-green-500 mb-3 text-xl"></i>
+                <p class="text-[10px] font-bold text-gray-500 uppercase">Engagement</p>
+                <h4 id="statEngage" class="text-2xl font-black mt-1">~6.8%</h4>
             </div>
         </section>
 
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="titan-card p-8">
-                <h5 class="text-sm font-bold mb-6 flex items-center gap-2">
-                    <span class="w-2 h-2 bg-red-600 rounded-full animate-ping"></span> Obunachilar O'sishi (Oylik)
-                </h5>
-                <canvas id="subsChart" height="250"></canvas>
+                <div class="flex justify-between items-center mb-8">
+                    <h5 class="font-black text-sm uppercase tracking-widest">O'sish Dinamikasi</h5>
+                    <div class="w-3 h-3 bg-red-600 rounded-full animate-ping"></div>
+                </div>
+                <canvas id="growthChart" height="250"></canvas>
             </div>
             <div class="titan-card p-8">
-                <h5 class="text-sm font-bold mb-6 flex items-center gap-2">
-                    <span class="w-2 h-2 bg-blue-600 rounded-full animate-ping"></span> Ko'rishlar Dinamikasi
-                </h5>
-                <canvas id="viewsChart" height="250"></canvas>
+                <div class="flex justify-between items-center mb-8">
+                    <h5 class="font-black text-sm uppercase tracking-widest">Video Performance</h5>
+                    <i class="fas fa-bolt text-yellow-500"></i>
+                </div>
+                <canvas id="perfChart" height="250"></canvas>
             </div>
         </section>
 
         <section class="titan-card p-8">
-            <div class="flex justify-between items-center mb-8">
-                <h5 class="text-xl font-black">Eng Mashhur <span class="text-red-600">10 Ta Video</span></h5>
-                <div class="flex gap-2">
-                    <button class="px-4 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold hover:bg-red-600 transition">LIKES</button>
-                    <button class="px-4 py-1 bg-red-600 rounded-lg text-[10px] font-bold">VIEWS</button>
-                </div>
-            </div>
-            <div id="videosGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <h5 class="text-xl font-black mb-8"><span class="text-red-600">TOP</span> VIDEOLAR</h5>
+            <div id="videosList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 </div>
         </section>
 
     </main>
 
-    <footer class="p-20 text-center opacity-30 text-[10px] tracking-[0.5em] uppercase">
-        Titan v2.5 Engine | Built for @operator_878
-    </footer>
-
+    <script src="main.js"></script>
     <script>
-        // URL dan ID ni olish
         const urlParams = new URLSearchParams(window.location.search);
         const channelId = urlParams.get('id');
+        let currentSubs = 0;
 
-        async function loadAllData() {
-            if (!channelId) { window.location.href = 'index.html'; return; }
+        async function initAnalytics() {
+            if (!channelId) return;
 
-            // 1. Asosiy ma'lumotlarni olish
-            const res = await fetch(`/.netlify/functions/get-data?type=detail&channelId=${channelId}`);
-            const data = await res.json();
-            const ch = data.items[0];
+            try {
+                // 1. Kanal ma'lumotlarini olish
+                const res = await fetch(`/.netlify/functions/get-data?type=detail&channelId=${channelId}`);
+                const data = await res.json();
+                const ch = data.items[0];
 
-            // 2. UI ni yangilash
-            document.getElementById('chMainTitle').innerText = ch.snippet.title;
-            document.getElementById('chMainHandle').innerText = ch.snippet.customUrl || "@" + ch.snippet.title.replace(/\s/g, '');
-            document.getElementById('chMainAvatar').src = ch.snippet.thumbnails.high.url;
-            document.getElementById('chDescription').innerText = ch.snippet.description || "Tavsif mavjud emas.";
-            
-            document.getElementById('statViews').innerText = parseInt(ch.statistics.viewCount).toLocaleString();
-            document.getElementById('statVideos').innerText = ch.statistics.videoCount;
-            
-            // 3. Live Counter
-            initLiveCounter(ch.statistics.subscriberCount);
+                // 2. UI ni to'ldirish
+                document.getElementById('chTitle').innerText = ch.snippet.title;
+                document.getElementById('chHandle').innerText = ch.snippet.customUrl || "@" + ch.id;
+                document.getElementById('chAvatar').src = ch.snippet.thumbnails.high.url;
+                document.getElementById('chBio').innerText = ch.snippet.description;
+                document.getElementById('statViews').innerText = formatNumber(ch.statistics.viewCount);
+                document.getElementById('statVideos').innerText = ch.statistics.videoCount;
+                document.getElementById('statDate').innerText = new Date(ch.snippet.publishedAt).getFullYear();
 
-            // 4. Grafiklar (Charts) - Random data (API hamma tarixni bermagani uchun simulyatsiya qilingan)
-            initCharts();
+                // 3. Live Counter mantiqi
+                currentSubs = parseInt(ch.statistics.subscriberCount);
+                startLiveCounter();
 
-            // 5. Videolarni yuklash
-            loadVideos();
+                // 4. Grafiklar
+                renderCharts();
+
+                // 5. Videolarni yuklash
+                loadTopVideos();
+
+            } catch (err) {
+                console.error("Load Error:", err);
+            }
         }
 
-        function initLiveCounter(start) {
-            let current = parseInt(start);
-            const el = document.getElementById('liveCounter');
+        // 15-qism: Jonli hisoblagich
+        function startLiveCounter() {
+            const el = document.getElementById('liveSubs');
+            const progress = document.getElementById('liveProgress');
+            
             setInterval(() => {
-                current += Math.floor(Math.random() * 3);
-                el.innerText = current.toLocaleString();
+                // Haqiqiy o'sish simulyatsiyasi
+                const chance = Math.random();
+                if (chance > 0.8) currentSubs += 1;
                 
-                // Progress bar simulyatsiyasi
-                let progress = (current % 1000000) / 10000;
-                document.getElementById('progressBar').style.width = progress + "%";
-                document.getElementById('progressPercent').innerText = Math.floor(progress) + "%";
+                el.innerText = formatNumber(currentSubs);
+                
+                // Progress bar harakati
+                let pWidth = (currentSubs % 1000) / 10;
+                progress.style.width = pWidth + "%";
             }, 2000);
         }
 
-        function initCharts() {
-            const ctxSubs = document.getElementById('subsChart').getContext('2d');
-            new Chart(ctxSubs, {
+        // Grafiklar (Chart.js)
+        function renderCharts() {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    labels: ['Okt', 'Noy', 'Dek', 'Yan', 'Fev', 'Mar'],
                     datasets: [{
-                        label: 'Obunachilar',
-                        data: [12000, 19000, 30000, 50000, 80000, 150000],
+                        label: 'Views',
+                        data: [65, 78, 110, 150, 180, 240],
                         borderColor: '#ef4444',
-                        tension: 0.4,
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
                         fill: true,
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)'
+                        tension: 0.4
                     }]
                 },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+                options: { 
+                    responsive: true, 
+                    plugins: { legend: { display: false } },
+                    scales: { y: { display: false }, x: { grid: { display: false } } }
+                }
             });
         }
 
-        async function loadVideos() {
-            const grid = document.getElementById('videosGrid');
-            // Funksiya orqali videolarni olish
+        async function loadTopVideos() {
             const res = await fetch(`/.netlify/functions/get-data?type=videos&channelId=${channelId}`);
             const data = await res.json();
-
-            grid.innerHTML = data.items.map(v => `
+            const list = document.getElementById('videosList');
+            
+            list.innerHTML = data.items.map(v => `
                 <div class="group cursor-pointer">
-                    <div class="relative overflow-hidden rounded-xl mb-3">
-                        <img src="${v.snippet.thumbnails.medium.url}" class="w-full aspect-video object-cover group-hover:scale-110 transition duration-500">
-                        <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[8px] font-bold">14:20</div>
+                    <div class="relative rounded-xl overflow-hidden mb-3 aspect-video">
+                        <img src="${v.snippet.thumbnails.medium.url}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
                     </div>
-                    <h6 class="text-[11px] font-bold line-clamp-2 mb-1 group-hover:text-red-500 transition">${v.snippet.title}</h6>
-                    <p class="text-[9px] text-gray-500">2 kun oldin yuklangan</p>
+                    <h6 class="text-[11px] font-bold line-clamp-2 leading-tight group-hover:text-red-600 transition">${v.snippet.title}</h6>
+                    <p class="text-[9px] text-gray-500 mt-2"><i class="fas fa-clock mr-1"></i> Mashhur Video</p>
                 </div>
             `).join('');
         }
 
-        window.onload = loadAllData;
+        window.onload = initAnalytics;
     </script>
 </body>
 </html>
