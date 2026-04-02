@@ -1,57 +1,117 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>Global Leaderboard | TITAN v2.5</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard | TITAN v2.5</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-[#050507] text-white">
-    <div class="container mx-auto py-20 px-4">
-        <h1 class="text-5xl font-black text-center mb-16">TOP <span class="text-red-600">CHANNELS</span></h1>
-        
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="border-b border-white/10 text-gray-500 uppercase text-xs tracking-widest">
-                        <th class="p-4">O'rin</th>
-                        <th class="p-4">Kanal</th>
-                        <th class="p-4">Obunachilar</th>
-                        <th class="p-4">Videolar</th>
-                        <th class="p-4">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody">
-                    </tbody>
-            </table>
+<body class="bg-titan-bg text-titan-text min-h-screen">
+
+    <nav class="p-6 border-b border-white/5 backdrop-blur-xl sticky top-0 z-50 bg-titan-bg/80 flex justify-between items-center">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="location.href='index.html'">
+            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+                <span class="text-white font-black text-sm">T</span>
+            </div>
+            <span class="text-xl font-black uppercase tracking-tighter">Leader<span class="text-red-600">board</span></span>
         </div>
-    </div>
+        <button id="themeToggle" class="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center">🌙</button>
+    </nav>
 
+    <main class="container-custom py-12">
+        
+        <section class="mb-16 text-center animate-fade">
+            <h1 class="text-5xl font-black mb-4 tracking-tight">BATTLE <span class="text-red-600">MODE</span></h1>
+            <p class="text-gray-500 text-sm max-w-xl mx-auto mb-10">Ikkita kanalni yonma-yon qo'ying va kim kuchliroq ekanligini real vaqtda aniqlang.</p>
+            
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6 max-w-4xl mx-auto">
+                <input type="text" id="id1" placeholder="1-Kanal ID" class="w-full md:w-1/3 p-4 rounded-2xl bg-white/5 border border-white/10 outline-none focus:border-red-600 transition">
+                <div class="text-2xl font-black text-red-600 opacity-50 italic">VS</div>
+                <input type="text" id="id2" placeholder="2-Kanal ID" class="w-full md:w-1/3 p-4 rounded-2xl bg-white/5 border border-white/10 outline-none focus:border-red-600 transition">
+                <button onclick="startBattle()" class="w-full md:w-auto px-10 py-4 bg-red-600 rounded-2xl font-bold shadow-lg shadow-red-600/20 hover:scale-105 active:scale-95 transition">JANGNI BOSHLASH</button>
+            </div>
+        </section>
+
+        <section class="titan-card overflow-hidden">
+            <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/5">
+                <h2 class="text-lg font-black tracking-widest uppercase">TOP REYTING</h2>
+                <span class="text-[10px] py-1 px-3 bg-green-500/10 text-green-500 rounded-full font-bold">LIVE UPDATES</span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-[10px] text-gray-500 uppercase tracking-[0.2em] border-b border-white/5">
+                            <th class="p-6">O'rin</th>
+                            <th class="p-6">Kanal</th>
+                            <th class="p-6">Obunachilar</th>
+                            <th class="p-6">Ko'rishlar</th>
+                            <th class="p-6">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <tr class="animate-pulse">
+                            <td colspan="5" class="p-20 text-center text-gray-600">Reyting yuklanmoqda...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="main.js"></script>
     <script>
-        // Oldindan belgilangan Top kanallar ID lari
-        const topChannels = ['UCX6OQ3DkcsbYNE6H8uQQuVA', 'UC_x5XG1OV2P6uYZ5FHSzXNg']; // Misol
+        // Oldindan belgilangan kanallar (Masalan: MrBeast, T-Series va h.k.)
+        const topIds = "UCX6OQ3DkcsbYNE6H8uQQuVA,UCq-Fj5jknLsUf-MWSy4_brA,UCpEhnqL0y41EpW2TvWAHD7Q,UCk8GzjMOr686n87BqsS8u-A";
 
-        async function fetchLeaderboard() {
-            const body = document.getElementById('leaderboardBody');
-            const res = await fetch(`/.netlify/functions/get-data?type=leaderboard&idList=${topChannels.join(',')}`);
-            const data = await res.json();
-
-            body.innerHTML = data.items.map((ch, index) => `
-                <tr class="border-b border-white/5 hover:bg-white/5 transition">
-                    <td class="p-4 font-black text-2xl text-gray-700">#${index+1}</td>
-                    <td class="p-4 flex items-center gap-4">
-                        <img src="${ch.snippet.thumbnails.default.url}" class="w-12 h-12 rounded-xl">
-                        <span class="font-bold">${ch.snippet.title}</span>
-                    </td>
-                    <td class="p-4 font-mono text-red-500">${parseInt(ch.statistics.subscriberCount).toLocaleString()}</td>
-                    <td class="p-4 text-gray-400">${ch.statistics.videoCount}</td>
-                    <td class="p-4">
-                        <button onclick="location.href='index.html?id=${ch.id}'" class="bg-white/10 px-4 py-1 rounded-full text-xs">Analyze</button>
-                    </td>
-                </tr>
-            `).join('');
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch(`/.netlify/functions/get-data?type=leaderboard&idList=${topIds}`);
+                const data = await res.json();
+                const body = document.getElementById('leaderboardBody');
+                
+                body.innerHTML = data.items.sort((a,b) => b.statistics.subscriberCount - a.statistics.subscriberCount).map((ch, index) => `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors group cursor-pointer" onclick="location.href='app.html?id=${ch.id}'">
+                        <td class="p-6 font-black text-2xl text-gray-700 group-hover:text-red-600">#${index + 1}</td>
+                        <td class="p-6">
+                            <div class="flex items-center gap-4">
+                                <img src="${ch.snippet.thumbnails.default.url}" class="w-12 h-12 rounded-xl border border-white/10">
+                                <div>
+                                    <h4 class="font-bold text-sm">${ch.snippet.title}</h4>
+                                    <p class="text-[10px] text-gray-500">${ch.snippet.customUrl || ch.id}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-6 font-mono text-sm font-bold">${formatNumber(ch.statistics.subscriberCount)}</td>
+                        <td class="p-6 font-mono text-sm text-gray-500">${formatNumber(ch.statistics.viewCount)}</td>
+                        <td class="p-6">
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                <span class="text-[9px] font-bold uppercase opacity-60 italic">Trending</span>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+            }
         }
-        fetchLeaderboard();
+
+        function startBattle() {
+            const id1 = document.getElementById('id1').value.trim();
+            const id2 = document.getElementById('id2').value.trim();
+            if(id1 && id2) {
+                // Battle rejimini ishga tushirish (Siz buni alohida battle.html qilsangiz ham bo'ladi)
+                alert(`Battle Mode: ${id1} vs ${id2} yaqinda qo'shiladi!`);
+            } else {
+                alert("Iltimos, ikkala kanal ID sini ham kiriting!");
+            }
+        }
+
+        window.onload = loadLeaderboard;
     </script>
 </body>
 </html>
