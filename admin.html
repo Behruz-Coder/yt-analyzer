@@ -1,44 +1,175 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Panel | TITAN v2.5</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard | TITAN v2.5</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        (function() {
+            const user = JSON.parse(localStorage.getItem('titan_user'));
+            if (!user || user.role !== 'owner') {
+                window.location.replace('index.html');
+            }
+        })();
+    </script>
 </head>
-<body class="bg-[#020204] text-white p-8">
-    <div class="flex justify-between items-center mb-10">
-        <h1 class="text-3xl font-black text-red-600">Admin Control <span class="text-white font-light text-sm">@operator_878</span></h1>
-        <button onclick="location.href='index.html'" class="px-4 py-2 bg-white/10 rounded-lg">Saytga qaytish</button>
-    </div>
+<body class="bg-titan-bg text-titan-text min-h-screen pb-10">
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="titan-card">
-            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">Taqiqlangan so'zlar</h3>
-            <div class="flex gap-2 mb-4">
-                <input type="text" id="newWord" class="bg-white/5 border border-white/10 p-2 rounded flex-grow text-sm outline-none">
-                <button onclick="addBadWord()" class="bg-red-600 px-4 rounded">+</button>
+    <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-yellow-500 to-red-600 z-[200]"></div>
+
+    <nav class="p-6 border-b border-white/5 backdrop-blur-xl sticky top-0 z-50 bg-black/40 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-yellow-500 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                <i class="fas fa-user-shield text-black text-xl"></i>
             </div>
-            <div id="wordsList" class="space-y-2 h-40 overflow-y-auto text-xs text-gray-400">
-                </div>
-        </div>
-
-        <div class="titan-card">
-            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">User Management</h3>
-            <div id="userList" class="space-y-3">
-                <div class="flex justify-between items-center text-sm p-2 bg-white/5 rounded">
-                    <span>User: #titan_992</span>
-                    <button class="text-red-500">Block IP</button>
-                </div>
+            <div>
+                <h1 class="text-xl font-black uppercase tracking-tighter">Admin <span class="text-yellow-500">Panel</span></h1>
+                <p class="text-[9px] text-gray-500 font-bold tracking-widest uppercase">Titan Control Engine v2.5</p>
             </div>
         </div>
-
-        <div class="titan-card">
-            <h3 class="font-bold mb-4 border-b border-white/10 pb-2">Server Status</h3>
-            <p class="text-green-500 text-sm">● YouTube API: Active</p>
-            <p class="text-green-500 text-sm mt-2">● Database: Connected</p>
-            <p class="text-gray-400 text-xs mt-4">Jami qidiruvlar: 14,201</p>
+        <div class="flex items-center gap-4">
+            <button onclick="location.href='index.html'" class="hidden md:block px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black hover:bg-white/10 transition">
+                SAYTGA QAYTISH
+            </button>
+            <button onclick="logoutUser()" class="px-4 py-2 bg-red-600/10 border border-red-600/20 text-red-500 rounded-xl text-[10px] font-black hover:bg-red-600 hover:text-white transition-all">
+                CHIQISH <i class="fas fa-power-off ml-2"></i>
+            </button>
         </div>
-    </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-10 space-y-8 animate-fade">
+        
+        <section class="titan-card p-10 bg-gradient-to-r from-yellow-500/5 to-transparent flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-6 text-center md:text-left">
+                <img src="https://ui-avatars.com/api/?name=Behruzbek+Qodirberganov&background=eab308&color=000&bold=true&size=128" 
+                     class="w-24 h-24 rounded-[2.5rem] border-4 border-yellow-500/20 shadow-2xl">
+                <div>
+                    <h2 class="text-3xl font-black tracking-tighter">Xush kelibsiz, Behruzbek!</h2>
+                    <p class="text-gray-500 text-sm mt-1">Platformangiz to'liq nazorat ostida. Barcha tizimlar barqaror.</p>
+                    <div class="flex gap-2 mt-4">
+                        <span class="px-3 py-1 bg-yellow-500/10 text-yellow-500 rounded-lg text-[9px] font-black tracking-widest border border-yellow-500/20 uppercase">Super Admin</span>
+                        <span class="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-[9px] font-black tracking-widest border border-blue-500/20 uppercase">Developer Mode</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Oxirgi kirish</p>
+                <p id="lastLogin" class="text-sm font-mono font-bold text-white">Hozir</p>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="titan-card p-6 border-b-2 border-yellow-500">
+                <p class="text-[9px] font-black text-gray-500 uppercase mb-3">API So'rovlar (Bugun)</p>
+                <div class="flex items-end gap-2">
+                    <span class="text-3xl font-black tabular-nums">482</span>
+                    <span class="text-green-500 text-[10px] font-bold mb-1"><i class="fas fa-caret-up"></i> 12%</span>
+                </div>
+            </div>
+            <div class="titan-card p-6 border-b-2 border-blue-500">
+                <p class="text-[9px] font-black text-gray-500 uppercase mb-3">Yangi Foydalanuvchilar</p>
+                <div class="flex items-end gap-2">
+                    <span class="text-3xl font-black tabular-nums">15</span>
+                    <span class="text-green-500 text-[10px] font-bold mb-1"><i class="fas fa-plus"></i> 3</span>
+                </div>
+            </div>
+            <div class="titan-card p-6 border-b-2 border-red-600">
+                <p class="text-[9px] font-black text-gray-500 uppercase mb-3">Server Yuklamasi</p>
+                <div class="flex items-end gap-2">
+                    <span class="text-3xl font-black tabular-nums">24%</span>
+                    <span class="text-gray-500 text-[10px] font-bold mb-1 uppercase tracking-widest">Normal</span>
+                </div>
+            </div>
+            <div class="titan-card p-6 border-b-2 border-purple-500">
+                <p class="text-[9px] font-black text-gray-500 uppercase mb-3">Analitika Hisobotlari</p>
+                <div class="flex items-end gap-2">
+                    <span class="text-3xl font-black tabular-nums">892</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="titan-card p-8 lg:col-span-2">
+                <h3 class="font-black text-sm uppercase tracking-widest mb-8 flex items-center gap-3">
+                    <i class="fas fa-cogs text-yellow-500"></i> Tizim Sozlamalari
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-gray-500 uppercase ml-2">YouTube API Key Status</label>
+                        <div class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl flex justify-between items-center">
+                            <span class="text-xs font-mono opacity-50">AIzaSy...X4k90</span>
+                            <span class="px-2 py-1 bg-green-500/20 text-green-500 rounded text-[8px] font-black uppercase">Active</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-gray-500 uppercase ml-2">Data Cache (Redis)</label>
+                        <div class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl flex justify-between items-center">
+                            <span class="text-xs font-bold uppercase">Enabled</span>
+                            <button class="text-red-500 text-[10px] font-black uppercase underline">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-8 border-t border-white/5">
+                    <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Xavfsizlik Jurnali</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl text-[10px]">
+                            <span class="text-gray-400 font-mono">14:20:05</span>
+                            <span class="font-bold">Admin login: uzb8972@gmail.com</span>
+                            <span class="text-green-500 font-black">SUCCESS</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl text-[10px]">
+                            <span class="text-gray-400 font-mono">13:15:22</span>
+                            <span class="font-bold">External search query: "MrBeast"</span>
+                            <span class="text-blue-500 font-black">LOGGED</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="titan-card p-8">
+                <h3 class="font-black text-sm uppercase tracking-widest mb-8 flex items-center gap-3">
+                    <i class="fas fa-bolt text-yellow-500"></i> Tezkor Buyruqlar
+                </h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <button class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-left hover:bg-yellow-500/10 hover:border-yellow-500 transition-all group">
+                        <i class="fas fa-file-export text-gray-500 group-hover:text-yellow-500 mr-3"></i>
+                        <span class="text-xs font-bold uppercase">DB Export (.json)</span>
+                    </button>
+                    <button class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-left hover:bg-blue-500/10 hover:border-blue-500 transition-all group">
+                        <i class="fas fa-sync text-gray-500 group-hover:text-blue-500 mr-3"></i>
+                        <span class="text-xs font-bold uppercase">Refresh API Quota</span>
+                    </button>
+                    <button class="w-full p-4 bg-red-600/10 border border-red-600/20 rounded-2xl text-left hover:bg-red-600 transition-all group">
+                        <i class="fas fa-trash-alt text-red-500 group-hover:text-white mr-3"></i>
+                        <span class="text-xs font-bold uppercase text-red-500 group-hover:text-white">Wipe Search History</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script src="main.js"></script>
+    <script>
+        // Admin sahifasi uchun maxsus vaqtni ko'rsatish
+        const now = new Date();
+        document.getElementById('lastLogin').innerText = now.toLocaleString('uz-UZ');
+        
+        // Chiqish funksiyasi (main.js dagi logoutUser ni chaqiradi yoki o'zida bajaradi)
+        function logoutUser() {
+            if(confirm("Haqiqatan ham boshqaruv panelidan chiqmoqchimisiz?")) {
+                localStorage.removeItem('titan_user');
+                localStorage.removeItem('isOwner');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
 </body>
 </html>
